@@ -1,4 +1,4 @@
-module github.com/disruptive-technologies/terraform-provider
+module github.com/disruptive-technologies/terraform-provider-dt
 
 go 1.22.7
 

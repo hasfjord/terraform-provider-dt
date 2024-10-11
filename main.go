@@ -8,7 +8,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/disruptive-technologies/terraform-provider/internal/provider"
+	"github.com/disruptive-technologies/terraform-provider-dt/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
@@ -31,7 +31,7 @@ func main() {
 		// TODO: Update this string with the published name of your provider.
 		// Also update the tfplugindocs generate command to either remove the
 		// -provider-name flag or set its value to the updated provider name.
-		Address: "registry.terraform.io/disruptive-technologies/terraform-provider",
+		Address: "disruptive-technologies.com/api/terraform-provider-dt",
 		Debug:   debug,
 	}
 
