@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type Client struct {
@@ -58,10 +61,18 @@ func (e *HTTPError) Error() string {
 }
 
 func (c *Client) GetProject(ctx context.Context, project string) (Project, error) {
-	request, err := http.NewRequestWithContext(ctx, "GET", c.URL+"/projects/"+project, nil)
+	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), idFromProject(project))
+	request, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return Project{}, err
 	}
+
+	ctx = tflog.SetField(ctx, "project", project)
+	ctx = tflog.SetField(ctx, "url", url)
+	ctx = tflog.SetField(ctx, "username", c.username)
+	ctx = tflog.SetField(ctx, "password_len", len(c.password))
+
+	tflog.Debug(ctx, "sending request")
 
 	request.SetBasicAuth(c.username, c.password)
 
@@ -197,4 +208,8 @@ func (c *Client) DeleteProject(ctx context.Context, project string) error {
 	}
 
 	return nil
+}
+
+func idFromProject(project string) string {
+	return strings.Split(project, "/")[1]
 }

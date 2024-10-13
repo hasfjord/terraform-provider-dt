@@ -35,7 +35,7 @@ type ScaffoldingProviderModel struct {
 }
 
 func (p *DTProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "disruptive-technologies"
+	resp.TypeName = "dt"
 	resp.Version = p.version
 }
 
@@ -44,16 +44,19 @@ func (p *DTProvider) Schema(ctx context.Context, req provider.SchemaRequest, res
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
 				Description: "The URL of the API server.",
-				Required:    true,
+				// Can use either environment variables or configuration, therefore optional: true
+				Optional: true,
 			},
 			"username": schema.StringAttribute{
 				Description: "The username to authenticate with.",
-				Required:    true,
+				// Can use either environment variables or configuration, therefore optional: true
+				Optional: true,
 			},
 			"password": schema.StringAttribute{
 				Description: "The password to authenticate with.",
 				Sensitive:   true,
-				Required:    true,
+				// Can use either environment variables or configuration, therefore optional: true
+				Optional: true,
 			},
 		},
 	}
@@ -84,7 +87,7 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 				"The URL of the dt api server must be set",
 			)
 		} else {
-			url = config.URL.String()
+			url = config.URL.ValueString()
 		}
 	}
 
@@ -97,7 +100,7 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 				"The username to authenticate with must be set",
 			)
 		} else {
-			username = config.Username.String()
+			username = config.Username.ValueString()
 		}
 	}
 
@@ -110,7 +113,7 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 				"The password to authenticate with must be set",
 			)
 		} else {
-			password = config.Password.String()
+			password = config.Password.ValueString()
 		}
 	}
 
@@ -132,7 +135,9 @@ func (p *DTProvider) Resources(ctx context.Context) []func() resource.Resource {
 }
 
 func (p *DTProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return nil
+	return []func() datasource.DataSource{
+		NewProjectDataSource,
+	}
 }
 
 func (p *DTProvider) Functions(ctx context.Context) []func() function.Function {
