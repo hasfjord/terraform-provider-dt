@@ -188,7 +188,8 @@ func (c *Client) CreateProject(ctx context.Context, project Project) (Project, e
 }
 
 func (c *Client) DeleteProject(ctx context.Context, project string) error {
-	request, err := http.NewRequestWithContext(ctx, http.MethodDelete, c.URL+"/projects/"+project, nil)
+	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), idFromProject(project))
+	request, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
 		return err
 	}

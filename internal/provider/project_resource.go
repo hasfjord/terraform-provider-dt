@@ -201,7 +201,20 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddError("not implemented", "delete is not implemented")
+	// retrieve the current state
+	var state projectResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// delete the project
+	err := r.client.DeleteProject(ctx, state.Name.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("failed to delete project", err.Error())
+		return
+	}
 }
 
 // Configure adds the provider configured client to the resource.
