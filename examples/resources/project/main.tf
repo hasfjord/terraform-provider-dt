@@ -13,11 +13,11 @@ provider "disruptive-technologies" {
 
 resource "dt_project" "provider_test_project" {
   provider     = disruptive-technologies
-  display_name = "Created by Terraform!"
+  display_name = "Provider Test Project"
   organization = "organizations/dt"
   location = {
-    latitude      = 63.4305
-    longitude     = 10.3951
+    latitude      = 63.44539
+    longitude     = 10.910202
     time_location = "Europe/Oslo"
   }
 }

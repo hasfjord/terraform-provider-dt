@@ -8,6 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -39,6 +43,9 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"name": schema.StringAttribute{
 				Computed:    true,
 				Description: "The resource name of the project. On the form `projects/{project_id}`.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"display_name": schema.StringAttribute{
 				Required:    true,
@@ -47,6 +54,9 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"inventory": schema.BoolAttribute{
 				Computed:    true,
 				Description: "Whether the project is an inventory project.",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"organization": schema.StringAttribute{
 				Required:    true,
@@ -55,14 +65,23 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"organization_display_name": schema.StringAttribute{
 				Computed:    true,
 				Description: "The display name of the organization that the project belongs to.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"sensor_count": schema.Int32Attribute{
 				Computed:    true,
 				Description: "The number of sensors in the project.",
+				PlanModifiers: []planmodifier.Int32{
+					int32planmodifier.UseStateForUnknown(),
+				},
 			},
 			"cloud_connector_count": schema.Int32Attribute{
 				Computed:    true,
 				Description: "The number of cloud connectors in the project.",
+				PlanModifiers: []planmodifier.Int32{
+					int32planmodifier.UseStateForUnknown(),
+				},
 			},
 			"location": schema.ObjectAttribute{
 				Optional: true,
@@ -153,10 +172,36 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	// retrieve values from plan
+	var plan projectResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// generate the api request from the plan
+	project := stateToProject(plan)
+	project, err := r.client.UpdateProject(ctx, project)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to update project", err.Error())
+		return
+	}
+
+	// set the updated state
+	plan = projectToState(project)
+
+	// set the state
+	diags = resp.State.Set(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	resp.Diagnostics.AddError("not implemented", "delete is not implemented")
 }
 
 // Configure adds the provider configured client to the resource.
