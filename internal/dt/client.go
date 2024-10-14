@@ -38,19 +38,22 @@ func (c *Client) WithHttpClient(httpClient http.Client) *Client {
 }
 
 type Project struct {
-	Name                    string `json:"name"`
-	DisplayName             string `json:"displayName"`
-	Inventory               bool   `json:"inventory"`
-	Organization            string `json:"organization"`
-	OrganizationDisplayName string `json:"organizationDisplayName"`
-	SensorCount             int    `json:"sensorCount"`
-	CloudConnectorCount     int    `json:"cloudConnectorCount"`
-	Location                struct {
-		Latitude     float64 `json:"latitude"`
-		Longitude    float64 `json:"longitude"`
-		TimeLocation string  `json:"timeLocation"`
-	} `json:"location"`
+	Name                    string   `json:"name"`
+	DisplayName             string   `json:"displayName"`
+	Inventory               bool     `json:"inventory"`
+	Organization            string   `json:"organization"`
+	OrganizationDisplayName string   `json:"organizationDisplayName"`
+	SensorCount             int      `json:"sensorCount"`
+	CloudConnectorCount     int      `json:"cloudConnectorCount"`
+	Location                Location `json:"location"`
 }
+
+type Location struct {
+	Latitude     float64 `json:"latitude"`
+	Longitude    float64 `json:"longitude"`
+	TimeLocation string  `json:"timeLocation"`
+}
+
 type HTTPError struct {
 	StatusCode int
 	Body       string
@@ -103,12 +106,13 @@ func (c *Client) GetProject(ctx context.Context, project string) (Project, error
 }
 
 func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, error) {
+	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), idFromProject(project.Name))
 	body, err := json.Marshal(project)
 	if err != nil {
 		return Project{}, err
 	}
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodPatch, c.URL+"/projects/"+project.Name, bytes.NewReader(body))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPatch, url, bytes.NewReader(body))
 	if err != nil {
 		return Project{}, err
 	}
@@ -143,12 +147,13 @@ func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, e
 }
 
 func (c *Client) CreateProject(ctx context.Context, project Project) (Project, error) {
+	url := fmt.Sprintf("%s/projects", strings.TrimSuffix(c.URL, "/"))
 	body, err := json.Marshal(project)
 	if err != nil {
 		return Project{}, err
 	}
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL+"/projects", bytes.NewReader(body))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return Project{}, err
 	}

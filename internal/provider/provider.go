@@ -130,8 +130,11 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	resp.ResourceData = client
 }
 
-func (p *DTProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return nil
+// Resources defines the resources implemented in the provider.
+func (p *DTProvider) Resources(_ context.Context) []func() resource.Resource {
+	return []func() resource.Resource{
+		NewProjectResource,
+	}
 }
 
 func (p *DTProvider) DataSources(ctx context.Context) []func() datasource.DataSource {

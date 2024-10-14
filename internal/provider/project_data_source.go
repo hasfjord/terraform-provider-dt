@@ -78,17 +78,17 @@ func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 
 // projectModel is the data model for the data source.
 type projectDataSourceModel struct {
-	Name                    types.String          `tfsdk:"name"`
-	DisplayName             types.String          `tfsdk:"display_name"`
-	Inventory               types.Bool            `tfsdk:"inventory"`
-	Organization            types.String          `tfsdk:"organization"`
-	OrganizationDisplayName types.String          `tfsdk:"organization_display_name"`
-	SensorCount             types.Int32           `tfsdk:"sensor_count"`
-	CloudConnectorCount     types.Int32           `tfsdk:"cloud_connector_count"`
-	Location                *projectLocationModel `tfsdk:"location"`
+	Name                    types.String                    `tfsdk:"name"`
+	DisplayName             types.String                    `tfsdk:"display_name"`
+	Inventory               types.Bool                      `tfsdk:"inventory"`
+	Organization            types.String                    `tfsdk:"organization"`
+	OrganizationDisplayName types.String                    `tfsdk:"organization_display_name"`
+	SensorCount             types.Int32                     `tfsdk:"sensor_count"`
+	CloudConnectorCount     types.Int32                     `tfsdk:"cloud_connector_count"`
+	Location                *projectLocationDataSourceModel `tfsdk:"location"`
 }
 
-type projectLocationModel struct {
+type projectLocationDataSourceModel struct {
 	Latitude     types.Float64 `tfsdk:"latitude"`
 	Longitude    types.Float64 `tfsdk:"longitude"`
 	TimeLocation types.String  `tfsdk:"time_location"`
@@ -118,7 +118,7 @@ func (d *projectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		OrganizationDisplayName: types.StringValue(project.OrganizationDisplayName),
 		SensorCount:             types.Int32Value(int32(project.SensorCount)),
 		CloudConnectorCount:     types.Int32Value(int32(project.CloudConnectorCount)),
-		Location: &projectLocationModel{
+		Location: &projectLocationDataSourceModel{
 			Latitude:     types.Float64Value(project.Location.Latitude),
 			Longitude:    types.Float64Value(project.Location.Longitude),
 			TimeLocation: types.StringValue(project.Location.TimeLocation),
