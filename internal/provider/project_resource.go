@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -132,7 +133,6 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	// Set the Terraform state.
 	plan = projectToState(project)
 
 	// Set the Terraform state.
@@ -166,6 +166,9 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		for _, diag := range resp.Diagnostics {
+			tflog.Error(ctx, diag.Summary())
+		}
 		return
 	}
 }
@@ -189,12 +192,15 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// set the updated state
-	plan = projectToState(project)
+	state := projectToState(project)
 
 	// set the state
-	diags = resp.State.Set(ctx, &plan)
+	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		for _, diag := range resp.Diagnostics {
+			tflog.Error(ctx, diag.Summary())
+		}
 		return
 	}
 }

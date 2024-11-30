@@ -9,27 +9,27 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/disruptive-technologies/terraform-provider-dt/internal/dt/oidc"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type Client struct {
-	username   string
-	password   string
 	URL        string
 	httpClient http.Client
+	oidc       *oidc.Client
 }
 
-func NewClient(URL string) *Client {
+type Config struct {
+	Oidc oidc.Config
+	URL  string
+}
+
+func NewClient(cfg Config) *Client {
 	return &Client{
-		URL:        URL,
+		URL:        cfg.URL,
 		httpClient: *http.DefaultClient,
+		oidc:       oidc.NewClient(cfg.Oidc),
 	}
-}
-
-func (c *Client) WithBasicAuth(username, password string) *Client {
-	c.username = username
-	c.password = password
-	return c
 }
 
 func (c *Client) WithHttpClient(httpClient http.Client) *Client {
@@ -64,40 +64,17 @@ func (e *HTTPError) Error() string {
 }
 
 func (c *Client) GetProject(ctx context.Context, project string) (Project, error) {
+	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
 	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), idFromProject(project))
-	request, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+
+	// Send a GET request to the API
+	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return Project{}, err
-	}
-
-	ctx = tflog.SetField(ctx, "project", project)
-	ctx = tflog.SetField(ctx, "url", url)
-	ctx = tflog.SetField(ctx, "username", c.username)
-	ctx = tflog.SetField(ctx, "password_len", len(c.password))
-
-	tflog.Debug(ctx, "sending request")
-
-	request.SetBasicAuth(c.username, c.password)
-
-	response, err := c.httpClient.Do(request)
-	if err != nil {
-		return Project{}, err
-	}
-	defer response.Body.Close()
-
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return Project{}, err
-	}
-	if response.StatusCode != http.StatusOK {
-		return Project{}, &HTTPError{
-			StatusCode: response.StatusCode,
-			Body:       string(bodyBytes),
-		}
 	}
 
 	var p Project
-	err = json.Unmarshal(bodyBytes, &p)
+	err = json.Unmarshal(responseBody, &p)
 	if err != nil {
 		return Project{}, err
 	}
@@ -106,39 +83,22 @@ func (c *Client) GetProject(ctx context.Context, project string) (Project, error
 }
 
 func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, error) {
+	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
 	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), idFromProject(project.Name))
 	body, err := json.Marshal(project)
 	if err != nil {
 		return Project{}, err
 	}
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodPatch, url, bytes.NewReader(body))
+	// Send a PUT request to the API
+	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, bytes.NewReader(body))
 	if err != nil {
 		return Project{}, err
 	}
 
-	request.SetBasicAuth(c.username, c.password)
-	request.Header.Set("Content-Type", "application/json")
-
-	response, err := c.httpClient.Do(request)
-	if err != nil {
-		return Project{}, err
-	}
-	defer response.Body.Close()
-
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return Project{}, err
-	}
-	if response.StatusCode != http.StatusOK {
-		return Project{}, &HTTPError{
-			StatusCode: response.StatusCode,
-			Body:       string(bodyBytes),
-		}
-	}
-
+	// Unmarshal the response body to a Project struct
 	var p Project
-	err = json.Unmarshal(bodyBytes, &p)
+	err = json.Unmarshal(responseBody, &p)
 	if err != nil {
 		return Project{}, err
 	}
@@ -146,40 +106,41 @@ func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, e
 	return p, nil
 }
 
+type createProjectRequest struct {
+	DisplayName  string `json:"displayName"`
+	Organization string `json:"organization"`
+	Location     struct {
+		Latitude     float64 `json:"latitude"`
+		Longitude    float64 `json:"longitude"`
+		TimeLocation string  `json:"timeLocation"`
+	} `json:"location"`
+}
+
 func (c *Client) CreateProject(ctx context.Context, project Project) (Project, error) {
+	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects
 	url := fmt.Sprintf("%s/projects", strings.TrimSuffix(c.URL, "/"))
-	body, err := json.Marshal(project)
+
+	createProjectRequest := createProjectRequest{
+		DisplayName:  project.DisplayName,
+		Organization: project.Organization,
+		Location:     project.Location,
+	}
+
+	// Marshal the project to JSON
+	body, err := json.Marshal(createProjectRequest)
 	if err != nil {
 		return Project{}, err
 	}
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	// Send a POST request to the API
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return Project{}, err
 	}
 
-	request.SetBasicAuth(c.username, c.password)
-	request.Header.Set("Content-Type", "application/json")
-
-	response, err := c.httpClient.Do(request)
-	if err != nil {
-		return Project{}, err
-	}
-	defer response.Body.Close()
-
-	bodyBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return Project{}, err
-	}
-	if response.StatusCode != http.StatusOK {
-		return Project{}, &HTTPError{
-			StatusCode: response.StatusCode,
-			Body:       string(bodyBytes),
-		}
-	}
-
+	// Unmarshal the response body to a Project struct
 	var p Project
-	err = json.Unmarshal(bodyBytes, &p)
+	err = json.Unmarshal(responseBody, &p)
 	if err != nil {
 		return Project{}, err
 	}
@@ -188,32 +149,57 @@ func (c *Client) CreateProject(ctx context.Context, project Project) (Project, e
 }
 
 func (c *Client) DeleteProject(ctx context.Context, project string) error {
+	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
 	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), idFromProject(project))
-	request, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
+
+	// Send a DELETE request to the API
+	_, err := c.DoRequest(ctx, http.MethodDelete, url, nil)
 	if err != nil {
 		return err
 	}
 
-	request.SetBasicAuth(c.username, c.password)
+	return nil
+}
+
+func (c *Client) DoRequest(ctx context.Context, method, url string, body io.Reader) ([]byte, error) {
+	request, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = tflog.SetField(ctx, "method", method)
+	ctx = tflog.SetField(ctx, "url", url)
+
+	tflog.Debug(ctx, "sending request to DT API")
+
+	// Get an OIDC token and set it as a Bearer token in the request
+	token, err := c.oidc.GetToken(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("dt: failed to get OIDC token: %w", err)
+	}
+	request.Header.Set("Authorization", "Bearer "+token.AccessToken)
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("dt: failed to send request: %w", err)
 	}
 	defer response.Body.Close()
 
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("dt: failed to read response body: %w, status: %d", err, response.StatusCode)
+	}
 	if response.StatusCode != http.StatusOK {
-		bodyBytes, err := io.ReadAll(response.Body)
-		if err != nil {
-			return err
-		}
-		return &HTTPError{
+		ctx = tflog.SetField(ctx, "status_code", response.StatusCode)
+		ctx = tflog.SetField(ctx, "body", string(bodyBytes))
+		tflog.Debug(ctx, "received non-200 status code from DT API")
+		return nil, &HTTPError{
 			StatusCode: response.StatusCode,
 			Body:       string(bodyBytes),
 		}
 	}
 
-	return nil
+	return bodyBytes, nil
 }
 
 func idFromProject(project string) string {
