@@ -195,6 +195,7 @@ func (p *DTProvider) Resources(_ context.Context) []func() resource.Resource {
 func (p *DTProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewProjectDataSource,
+		NewDeviceDataSource,
 	}
 }
 

@@ -11,11 +11,11 @@ provider "disruptive-technologies" {
   token_endpoint = "https://identity.dev.disruptive-technologies.com/oauth2/token"
 }
 
-data "dt_project" "thomas_test_project" {
+data "dt_device" "test_device" {
   provider = disruptive-technologies
-  name     = "projects/ccol8iuk9smqiha4e8l0"
+  name     = "projects/ccol8iuk9smqiha4e8l0/devices/emucv0799gjrncc73fnv1dg"
 }
 
-output "project" {
-  value = data.dt_project.thomas_test_project
+output "device" {
+  value = data.dt_device.test_device
 }
