@@ -36,6 +36,10 @@ func (d *projectDataSource) Metadata(_ context.Context, req datasource.MetadataR
 func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The resource ID of the project.",
+			},
 			"name": schema.StringAttribute{
 				Required:    true,
 				Description: "The resource name of the project. On the form `projects/{project_id}`.",
@@ -78,6 +82,7 @@ func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 
 // projectModel is the data model for the data source.
 type projectDataSourceModel struct {
+	ID                      types.String                    `tfsdk:"id"`
 	Name                    types.String                    `tfsdk:"name"`
 	DisplayName             types.String                    `tfsdk:"display_name"`
 	Inventory               types.Bool                      `tfsdk:"inventory"`
@@ -110,23 +115,14 @@ func (d *projectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	state := projectDataSourceModel{
-		Name:                    types.StringValue(project.Name),
-		DisplayName:             types.StringValue(project.DisplayName),
-		Inventory:               types.BoolValue(project.Inventory),
-		Organization:            types.StringValue(project.Organization),
-		OrganizationDisplayName: types.StringValue(project.OrganizationDisplayName),
-		SensorCount:             types.Int32Value(int32(project.SensorCount)),
-		CloudConnectorCount:     types.Int32Value(int32(project.CloudConnectorCount)),
-		Location: &projectLocationDataSourceModel{
-			Latitude:     types.Float64Value(project.Location.Latitude),
-			Longitude:    types.Float64Value(project.Location.Longitude),
-			TimeLocation: types.StringValue(project.Location.TimeLocation),
-		},
+	state, diags := projectToState(project)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	// set state
-	diags := resp.State.Set(ctx, &state)
+	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

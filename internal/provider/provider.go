@@ -188,6 +188,7 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 func (p *DTProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewProjectResource,
+		NewDataConnectorResource,
 	}
 }
 

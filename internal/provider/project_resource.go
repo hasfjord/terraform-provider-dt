@@ -6,6 +6,7 @@ import (
 
 	"github.com/disruptive-technologies/terraform-provider-dt/internal/dt"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -13,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -41,6 +41,13 @@ func (r *projectResource) Metadata(_ context.Context, req resource.MetadataReque
 func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The project ID.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Computed:    true,
 				Description: "The resource name of the project. On the form `projects/{project_id}`.",
@@ -98,6 +105,7 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 
 // projectModel is the data model for the data source.
 type projectResourceModel struct {
+	ID                      types.String                  `tfsdk:"id"`
 	Name                    types.String                  `tfsdk:"name"`
 	DisplayName             types.String                  `tfsdk:"display_name"`
 	Inventory               types.Bool                    `tfsdk:"inventory"`
@@ -133,7 +141,11 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	plan = projectToState(project)
+	plan, diags := projectToState(project)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Set the Terraform state.
 	dias = resp.State.Set(ctx, &plan)
@@ -160,15 +172,16 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	state = projectToState(project)
+	state, diags = projectToState(project)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// set refreshed state
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		for _, diag := range resp.Diagnostics {
-			tflog.Error(ctx, diag.Summary())
-		}
 		return
 	}
 }
@@ -192,15 +205,16 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// set the updated state
-	state := projectToState(project)
+	state, diags := projectToState(project)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// set the state
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		for _, diag := range resp.Diagnostics {
-			tflog.Error(ctx, diag.Summary())
-		}
 		return
 	}
 }
@@ -245,8 +259,14 @@ func (r *projectResource) Configure(_ context.Context, req resource.ConfigureReq
 	r.client = client
 }
 
-func projectToState(project dt.Project) projectResourceModel {
+func projectToState(project dt.Project) (projectResourceModel, diag.Diagnostics) {
+	id, err := project.ID()
+	if err != nil {
+		diags := diag.NewErrorDiagnostic("ID", "failed to get project ID")
+		return projectResourceModel{}, diag.Diagnostics{diags}
+	}
 	return projectResourceModel{
+		ID:                      types.StringValue(id),
 		Name:                    types.StringValue(project.Name),
 		DisplayName:             types.StringValue(project.DisplayName),
 		Inventory:               types.BoolValue(project.Inventory),
@@ -259,7 +279,7 @@ func projectToState(project dt.Project) projectResourceModel {
 			Longitude:    types.Float64Value(project.Location.Longitude),
 			TimeLocation: types.StringValue(project.Location.TimeLocation),
 		},
-	}
+	}, nil
 }
 
 func stateToProject(state projectResourceModel) dt.Project {
