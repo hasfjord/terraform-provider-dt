@@ -2,7 +2,7 @@
 
 data "dt_project" "test_project" {
   provider = disruptive-technologies
-  name     = "projects/ccol8iuk9smqiha4e8l0"
+  name     = "projects/your-project-id"
 }
 
 output "project" {
