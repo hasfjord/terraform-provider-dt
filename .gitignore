@@ -34,3 +34,11 @@ website/vendor
 # Keep windows files with windows line endings
 *.winfile eol=crlf
 .vscode*
+
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+.terraformrc
+.terraform.lock.hcl
