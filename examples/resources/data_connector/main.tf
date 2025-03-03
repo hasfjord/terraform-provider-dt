@@ -4,7 +4,7 @@ terraform {
   }
   required_providers {
     disruptive-technologies = {
-      source = "disruptive-technologies.com/api/dt"
+      source = "registry.terraform.io/hasfjord/dt"
     }
   }
 }
