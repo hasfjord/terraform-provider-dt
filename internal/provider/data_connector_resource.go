@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+
 package provider
 
 import (
@@ -63,7 +65,7 @@ func (r *dataConnectorResource) Schema(ctx context.Context, req resource.SchemaR
 			},
 			"type": schema.StringAttribute{
 				Required:    true,
-				Description: "Type of connector.",
+				Description: "Type of connector, allowed values: HTTP_PUSH, AZURE_SERVICE_BUS, AZURE_EVENT_HUB, GOOGLE_CLOUD_PUBSUB, AWS_SQS.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

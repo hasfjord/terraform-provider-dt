@@ -1,3 +1,5 @@
+# Copyright (c) HashiCorp, Inc.
+
 terraform {
   backend "local" {
     path = "./terraform.tfstate"

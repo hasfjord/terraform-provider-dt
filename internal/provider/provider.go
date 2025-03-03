@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
+// Ensure The provider satisfies various provider interfaces.
 var _ provider.Provider = &DTProvider{}
 var _ provider.ProviderWithFunctions = &DTProvider{}
 
@@ -31,8 +31,8 @@ type DTProvider struct {
 	version string
 }
 
-// ScaffoldingProviderModel describes the provider data model.
-type ScaffoldingProviderModel struct {
+// DTProviderModel describes the provider data model.
+type DTProviderModel struct {
 	Endpoint types.String `tfsdk:"endpoint"`
 }
 
