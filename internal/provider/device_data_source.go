@@ -84,7 +84,11 @@ func (d deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	deviceID, projectID := idFromName(device.Name)
+	deviceID, projectID, err := idFromName(device.Name)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get device ID and project ID", err.Error())
+		return
+	}
 	labels, diag := types.MapValueFrom(ctx, types.StringType, device.Labels)
 	resp.Diagnostics.Append(diag...)
 	if diag.HasError() {
@@ -125,7 +129,10 @@ func (d *deviceDataSource) Configure(ctx context.Context, req datasource.Configu
 	d.client = *client
 }
 
-func idFromName(name string) (string, string) {
+func idFromName(name string) (string, string, error) {
 	parts := strings.Split(name, "/")
-	return parts[len(parts)-1], parts[len(parts)-3]
+	if len(parts) != 4 {
+		return name, "", fmt.Errorf("invalid device name: %s", name)
+	}
+	return parts[len(parts)-1], parts[len(parts)-3], nil
 }
