@@ -74,18 +74,15 @@ func (c *Client) DoRequest(ctx context.Context, method, url string, body io.Read
 	if err != nil {
 		return nil, fmt.Errorf("dt: failed to read response body: %w, status: %d", err, response.StatusCode)
 	}
+	ctx = tflog.SetField(ctx, "status_code", response.StatusCode)
+	ctx = tflog.SetField(ctx, "body", string(bodyBytes))
 	if response.StatusCode != http.StatusOK {
-		ctx = tflog.SetField(ctx, "status_code", response.StatusCode)
-		ctx = tflog.SetField(ctx, "body", string(bodyBytes))
 		tflog.Debug(ctx, "received non-200 status code from DT API")
 		return nil, &HTTPError{
 			StatusCode: response.StatusCode,
 			Body:       string(bodyBytes),
 		}
 	}
-
-	ctx = tflog.SetField(ctx, "status_code", response.StatusCode)
-	ctx = tflog.SetField(ctx, "body", string(bodyBytes))
 
 	tflog.Debug(ctx, "received response from DT API")
 

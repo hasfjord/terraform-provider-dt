@@ -116,9 +116,9 @@ func (c *Client) GetToken(ctx context.Context) (*AuthResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("oidc: failed to read response body: %w, status: %d", err, response.StatusCode)
 	}
+	ctx = tflog.SetField(ctx, "body", string(bodyBytes))
+	ctx = tflog.SetField(ctx, "status_code", response.StatusCode)
 	if response.StatusCode != http.StatusOK {
-		ctx = tflog.SetField(ctx, "status_code", response.StatusCode)
-		ctx = tflog.SetField(ctx, "body", string(bodyBytes))
 		tflog.Debug(ctx, "received non-200 status code from DT API")
 		return nil, fmt.Errorf("HTTP error: %d: %s", response.StatusCode, string(bodyBytes))
 	}
@@ -127,6 +127,7 @@ func (c *Client) GetToken(ctx context.Context) (*AuthResponse, error) {
 	var authResponse *AuthResponse
 	err = json.Unmarshal(bodyBytes, &authResponse)
 	if err != nil {
+		tflog.Debug(ctx, "failed to unmarshal response body")
 		return nil, fmt.Errorf("oidc: failed to unmarshal response body: %w", err)
 	}
 
