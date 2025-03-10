@@ -119,7 +119,7 @@ func (c *Client) CreateDataConnector(ctx context.Context, projectID string, data
 	request := dataConnectorToCreateDataConnectorRequest(dataConnector)
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}/dataconnectors
-	url := fmt.Sprintf("%s/projects/%s/dataconnectors", strings.TrimSuffix(c.URL, "/"), projectID)
+	url := fmt.Sprintf("%s/v2/projects/%s/dataconnectors", strings.TrimSuffix(c.URL, "/"), projectID)
 	body, err := json.Marshal(request)
 	if err != nil {
 		return DataConnector{}, err
@@ -149,7 +149,7 @@ func (c *Client) UpdateDataConnector(ctx context.Context, dc DataConnector) (Dat
 	}
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}/dataconnectors/{data_connector_id}
-	url := fmt.Sprintf("%s/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
+	url := fmt.Sprintf("%s/v2/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
 	body, err := json.Marshal(dc)
 	if err != nil {
 		return DataConnector{}, err
@@ -179,7 +179,7 @@ func (c *Client) DeleteDataConnector(ctx context.Context, dataConnector string) 
 	}
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}/dataconnectors/{data_connector_id}
-	url := fmt.Sprintf("%s/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
+	url := fmt.Sprintf("%s/v2/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
 
 	// Send a DELETE request to the API
 	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil)

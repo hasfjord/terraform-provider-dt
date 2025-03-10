@@ -99,7 +99,7 @@ type createProjectRequest struct {
 
 func (c *Client) CreateProject(ctx context.Context, project Project) (Project, error) {
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects
-	url := fmt.Sprintf("%s/projects", strings.TrimSuffix(c.URL, "/"))
+	url := fmt.Sprintf("%s/v2/projects", strings.TrimSuffix(c.URL, "/"))
 
 	createProjectRequest := createProjectRequest{
 		DisplayName:  project.DisplayName,
@@ -137,7 +137,7 @@ func (c *Client) DeleteProject(ctx context.Context, project string) error {
 	}
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
-	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
+	url := fmt.Sprintf("%s/v2/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
 
 	// Send a DELETE request to the API
 	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil)
