@@ -10,8 +10,6 @@ The provider currently supports the following resources and data sources:
 - [ ] Data Connector data source
 - [ ] Labels Resource
 - [ ] Labels Data Source
-- [ ] Metrics Resource
-- [ ] Metrics Data Source
 - [ ] Organization Data Source
 - [x] Project data source
 - [x] Project resource
