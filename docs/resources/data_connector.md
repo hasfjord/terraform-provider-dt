@@ -16,8 +16,7 @@ description: |-
 # Copyright (c) HashiCorp, Inc.
 
 data "dt_project" "provider_test_project" {
-  provider = disruptive-technologies
-  name     = "projects/your-project-id"
+  name = "projects/your-project-id"
 }
 
 data "google_iam_workload_identity_pool" "pool" {
@@ -38,7 +37,6 @@ resource "google_pubsub_topic_iam_member" "default" {
 }
 
 resource "dt_data_connector" "pub_sub_data_connector" {
-  provider     = disruptive-technologies
   display_name = "Pub/Sub Data Connector"
   type         = "GOOGLE_CLOUD_PUBSUB"
   project      = data.dt_project.provider_test_project.id

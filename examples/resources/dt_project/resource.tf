@@ -1,7 +1,6 @@
 # Copyright (c) HashiCorp, Inc.
 
 resource "dt_project" "provider_test_project" {
-  provider     = disruptive-technologies
   display_name = "Provider Test"
   organization = "organizations/dt"
   location = {
