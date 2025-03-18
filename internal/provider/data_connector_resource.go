@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -263,6 +262,7 @@ type awsSQSConfig struct {
 	Audience   types.String `tfsdk:"audience"`
 }
 
+// Create creates the resource and sets the initial Terraform state.
 func (r *dataConnectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve the data from the request
 	var plan dataConnectorResourceModel
@@ -270,11 +270,6 @@ func (r *dataConnectorResource) Create(ctx context.Context, req resource.CreateR
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-	if plan.Events.IsNull() {
-		tflog.Debug(ctx, "Events are null in plan")
-	} else {
-		tflog.Debug(ctx, "Events are not null in plan")
 	}
 
 	toBeCreated, diags := stateToDataConnector(ctx, plan)
@@ -290,22 +285,10 @@ func (r *dataConnectorResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	if created.Events == nil {
-		tflog.Debug(ctx, "Events are null in created")
-	} else {
-		tflog.Debug(ctx, "Events are not null in created")
-	}
-
 	state, diags := dataConnectorToState(ctx, created)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	if state.Events.IsNull() {
-		tflog.Debug(ctx, "Events are null in state")
-	} else {
-		tflog.Debug(ctx, "Events are not null in state")
 	}
 
 	// Set the Terraform state
@@ -630,35 +613,4 @@ func validateTypeConfig(plan dataConnectorResourceModel) diag.Diagnostics {
 	}
 
 	return diags
-}
-
-// flattenStringList converts a list of strings to a list of string values.
-func flattenStringListToAttr(ctx context.Context, input []string) (basetypes.ListValue, diag.Diagnostics) {
-	if input == nil {
-		return types.ListNull(types.StringType), nil
-	}
-	list, diags := types.ListValueFrom(ctx, types.StringType, input)
-	if diags.HasError() {
-		return types.ListValueMust(types.StringType, []attr.Value{}), diags
-	}
-	return list, nil
-}
-
-// expandStringList converts a list of string values to a list of strings.
-func expandStringList(ctx context.Context, listValue basetypes.ListValue) ([]string, diag.Diagnostics) {
-	if listValue.IsNull() {
-		return nil, nil
-	}
-	if listValue.IsUnknown() {
-		return nil, nil
-	}
-	elements := make([]types.String, 0, len(listValue.Elements()))
-	diags := listValue.ElementsAs(ctx, &elements, false)
-
-	var result []string
-	for _, element := range elements {
-		result = append(result, element.ValueString())
-	}
-
-	return result, diags
 }

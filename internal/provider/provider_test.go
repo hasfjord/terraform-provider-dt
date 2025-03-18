@@ -34,7 +34,7 @@ email = "myServiceAccount@myProject.serviceaccount.d21s.com"
 key_id = "myKey"
 key_secret = "mySecret"
 token_endpoint = "` + testDTServer.URL + `/token"
-url = "` + testDTServer.URL + `/v2/"
+url = "` + testDTServer.URL + `"
 }
 
 `

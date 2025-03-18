@@ -189,6 +189,7 @@ func (p *DTProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewProjectResource,
 		NewDataConnectorResource,
+		NewNotificationRuleResource,
 	}
 }
 

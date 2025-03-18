@@ -40,7 +40,7 @@ func (c *Client) GetProject(ctx context.Context, projectName string) (Project, e
 	}
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
-	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
+	url := fmt.Sprintf("%s/v2/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
 
 	// Send a GET request to the API
 	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
@@ -65,7 +65,7 @@ func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, e
 	}
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
-	url := fmt.Sprintf("%s/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
+	url := fmt.Sprintf("%s/v2/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
 	body, err := json.Marshal(project)
 	if err != nil {
 		return Project{}, err

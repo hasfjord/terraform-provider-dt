@@ -39,7 +39,7 @@ type EscalationLevel struct {
 
 // Note: some of these notification types are not available for all customers.
 type NotificationAction struct {
-	Type                 int32                 `json:"type"`
+	Type                 string                `json:"type"`
 	SMSConfig            *SMSConfig            `json:"sms"`
 	EmailConfig          *EmailConfig          `json:"email"`
 	CorrigoConfig        *CorrigoConfig        `json:"corrigo"`
@@ -87,10 +87,9 @@ type WebhookConfig struct {
 }
 
 type PhoneCallConfig struct {
-	Recipients         []string `json:"recipients"`
-	Introduction       string   `json:"introduction"`
-	Message            string   `json:"message"`
-	ReplayInstructions string   `json:"replayInstructions"`
+	Recipients   []string `json:"recipients"`
+	Introduction string   `json:"introduction"`
+	Message      string   `json:"message"`
 }
 
 type SignalTowerConfig struct {
@@ -98,106 +97,115 @@ type SignalTowerConfig struct {
 }
 
 type Trigger struct {
-	Criteria struct {
-		Range *struct {
-			Lower float64 `json:"lower"`
-			Upper float64 `json:"upper"`
-			Type  int32   `json:"type"`
-		} `json:"range"`
-		Presence *string `json:"presence"`
-		Count    *struct {
-			Type     int32         `json:"type"`
-			Delta    float64       `json:"delta"`
-			Duration time.Duration `json:"duration"`
-		} `json:"count"`
-		Motion     *int32 `json:"motion"`
-		Occupancy  *int32 `json:"occupancy"`
-		Connection *int32 `json:"connection"`
-		Contact    *int32 `json:"contact"`
-	} `json:"criteria"`
-	TriggerCount int `json:"triggerCount"`
+	Field        string   `json:"field"`
+	Criteria     Criteria `json:"criteria"`
+	TriggerCount int32    `json:"triggerCount"`
+}
+
+type Criteria struct {
+	Range      *Range  `json:"range"`
+	Presence   *string `json:"presence"`
+	Motion     *string `json:"motion"`
+	Occupancy  *string `json:"occupancy"`
+	Connection *string `json:"connection"`
+	Contact    *string `json:"contact"`
+}
+
+type Range struct {
+	Lower float64 `json:"lower"`
+	Upper float64 `json:"upper"`
+	Type  string  `json:"type"`
 }
 
 type Schedule struct {
 	Timezone string `json:"timezone"`
-	Slots    []struct {
-		DaysOfWeek []int32 `json:"daysOfWeek"`
-		TimeOfDay  struct {
-			Hour   int32 `json:"hour"`
-			Minute int32 `json:"minute"`
-		} `json:"timeOfDay"`
-	} `json:"slots"`
-	Inverse bool `json:"inverse"`
+	Slots    []Slot `json:"slots"`
+	Inverse  bool   `json:"inverse"`
+}
+
+type Slot struct {
+	DaysOfWeek []string    `json:"day"`
+	TimeRange  []TimeRange `json:"times"`
+}
+
+type TimeRange struct {
+	Start TimeOfDay `json:"start"`
+	End   TimeOfDay `json:"end"`
+}
+
+type TimeOfDay struct {
+	Hour   int32 `json:"hour"`
+	Minute int32 `json:"minute"`
 }
 
 // GetNotificationRule returns a notification rule by resource name.
-func (c *Client) GetNotificationRule(ctx context.Context, name string) (*NotificationRule, error) {
+func (c *Client) GetNotificationRule(ctx context.Context, name string) (NotificationRule, error) {
 	projectID, ruleID, err := parseResourceName(name)
 	if err != nil {
-		return nil, fmt.Errorf("dt: failed to parse resource name: %w", err)
+		return NotificationRule{}, fmt.Errorf("dt: failed to parse resource name: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules/%s", strings.TrimSuffix(c.URL, "/"), projectID, ruleID)
 	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("dt: failed to get notification rule: %w", err)
+		return NotificationRule{}, fmt.Errorf("dt: failed to get notification rule: %w", err)
 	}
 
 	var rule NotificationRule
 	if err := json.Unmarshal(responseBody, &rule); err != nil {
-		return nil, fmt.Errorf("dt: failed to unmarshal notification rule: %w", err)
+		return NotificationRule{}, fmt.Errorf("dt: failed to unmarshal notification rule: %w", err)
 	}
 
-	return &rule, nil
+	return rule, nil
 }
 
 // CreateNotificationRule creates a new notification rule.
-func (c *Client) CreateNotificationRule(ctx context.Context, projectID string, rule NotificationRule) (error, *NotificationRule) {
+func (c *Client) CreateNotificationRule(ctx context.Context, projectID string, rule NotificationRule) (NotificationRule, error) {
 	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules", strings.TrimSuffix(c.URL, "/"), projectID)
 
 	body, err := json.Marshal(rule)
 	if err != nil {
-		return fmt.Errorf("dt: failed to marshal notification rule: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to marshal notification rule: %w", err)
 	}
 
 	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
-		return fmt.Errorf("dt: failed to create notification rule: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to create notification rule: %w", err)
 	}
 
 	var createdRule NotificationRule
 	if err := json.Unmarshal(responseBody, &createdRule); err != nil {
-		return fmt.Errorf("dt: failed to unmarshal created notification rule: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to unmarshal created notification rule: %w", err)
 	}
 
-	return nil, &createdRule
+	return createdRule, nil
 }
 
 // UpdateNotificationRule updates an existing notification rule.
-func (c *Client) UpdateNotificationRule(ctx context.Context, rule NotificationRule) (error, *NotificationRule) {
+func (c *Client) UpdateNotificationRule(ctx context.Context, rule NotificationRule) (NotificationRule, error) {
 	projectID, ruleID, err := parseResourceName(rule.Name)
 	if err != nil {
-		return fmt.Errorf("dt: failed to parse resource name: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to parse resource name: %w", err)
 	}
 
 	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules/%s", strings.TrimSuffix(c.URL, "/"), projectID, ruleID)
 
 	body, err := json.Marshal(rule)
 	if err != nil {
-		return fmt.Errorf("dt: failed to marshal notification rule: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to marshal notification rule: %w", err)
 	}
 
 	responseBody, err := c.DoRequest(ctx, http.MethodPut, url, bytes.NewReader(body))
 	if err != nil {
-		return fmt.Errorf("dt: failed to update notification rule: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to update notification rule: %w", err)
 	}
 
 	var updatedRule NotificationRule
 	if err := json.Unmarshal(responseBody, &updatedRule); err != nil {
-		return fmt.Errorf("dt: failed to unmarshal updated notification rule: %w", err), nil
+		return NotificationRule{}, fmt.Errorf("dt: failed to unmarshal updated notification rule: %w", err)
 	}
 
-	return nil, &updatedRule
+	return updatedRule, nil
 }
 
 // DeleteNotificationRule deletes a notification rule.
