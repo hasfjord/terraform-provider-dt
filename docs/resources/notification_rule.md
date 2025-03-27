@@ -81,11 +81,6 @@ resource "dt_notification_rule" "provider_test_notification_rule" {
 								will be sent out once again, and the escalation timer will start. The default value
 								is 4 hours.
 
-								A possible expansion is to add this field to each escalation level as well. This would
-								override the value set here, and allow for different unacknowledgement times for different
-								escalation levels. This increases complexity, and should only be added if there is a clear
-								use case for it.
-
 ### Read-Only
 
 - `name` (String) The resource name of the rule. The resource name has the following format: "projects/{project_id}/rules/{rule_id}". 
@@ -114,7 +109,6 @@ Read-Only:
 - `trigger_count` (Number) The number of times a device has to meet the trigger criteria (enter triggering mode) 
 											before a notification is published. The value has to be greater than 1 for this feature
 											to be "enabled". A value of 0 or 1 is considered equivalent.
-	
 											Note that this feature can't be used with trigger delay, reminder notifications or 
 											resolved notifications.
 
