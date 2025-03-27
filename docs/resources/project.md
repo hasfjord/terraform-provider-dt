@@ -33,11 +33,8 @@ resource "dt_project" "provider_test_project" {
 ### Required
 
 - `display_name` (String) The display name of the project.
+- `location` (Attributes) (see [below for nested schema](#nestedatt--location))
 - `organization` (String) The reource name of the organization that the project belongs to. on the form `organizations/{organization_id}`.
-
-### Optional
-
-- `location` (Object) (see [below for nested schema](#nestedatt--location))
 
 ### Read-Only
 
@@ -51,8 +48,11 @@ resource "dt_project" "provider_test_project" {
 <a id="nestedatt--location"></a>
 ### Nested Schema for `location`
 
+Required:
+
+- `time_location` (String) The time location of the project. This is used to determine the time zone of the project. For example, `Europe/Oslo`.
+
 Optional:
 
-- `latitude` (Number)
-- `longitude` (Number)
-- `time_location` (String)
+- `latitude` (Number) The latitude of the project in Degrees Decimal. This is used to determine the time zone of the project.
+- `longitude` (Number) The longitude of the project in Degrees Decimal. This is used to determine the time zone of the project.

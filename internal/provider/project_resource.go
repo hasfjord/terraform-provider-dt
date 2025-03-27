@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/disruptive-technologies/terraform-provider-dt/internal/dt"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -93,12 +92,23 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					int32planmodifier.UseStateForUnknown(),
 				},
 			},
-			"location": schema.ObjectAttribute{
-				Optional: true,
-				AttributeTypes: map[string]attr.Type{
-					"latitude":      types.Float64Type,
-					"longitude":     types.Float64Type,
-					"time_location": types.StringType,
+			"location": schema.SingleNestedAttribute{
+				Required: true,
+				Attributes: map[string]schema.Attribute{
+					"latitude": schema.Float64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "The latitude of the project in Degrees Decimal. This is used to determine the time zone of the project.",
+					},
+					"longitude": schema.Float64Attribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "The longitude of the project in Degrees Decimal. This is used to determine the time zone of the project.",
+					},
+					"time_location": schema.StringAttribute{
+						Required:    true,
+						Description: "The time location of the project. This is used to determine the time zone of the project. For example, `Europe/Oslo`.",
+					},
 				},
 			},
 		},
@@ -285,7 +295,8 @@ func projectToState(project dt.Project) (projectResourceModel, diag.Diagnostics)
 }
 
 func stateToProject(state projectResourceModel) dt.Project {
-	return dt.Project{
+
+	project := dt.Project{
 		Name:                    state.Name.ValueString(),
 		DisplayName:             state.DisplayName.ValueString(),
 		Inventory:               state.Inventory.ValueBool(),
@@ -293,10 +304,13 @@ func stateToProject(state projectResourceModel) dt.Project {
 		OrganizationDisplayName: state.OrganizationDisplayName.ValueString(),
 		SensorCount:             int(state.SensorCount.ValueInt32()),
 		CloudConnectorCount:     int(state.CloudConnectorCount.ValueInt32()),
-		Location: dt.Location{
+	}
+	if state.Location != nil {
+		project.Location = dt.Location{
 			Latitude:     state.Location.Latitude.ValueFloat64(),
 			Longitude:    state.Location.Longitude.ValueFloat64(),
 			TimeLocation: state.Location.TimeLocation.ValueString(),
-		},
+		}
 	}
+	return project
 }
