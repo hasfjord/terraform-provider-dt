@@ -13,7 +13,7 @@ The provider currently supports the following resources and data sources:
 - [ ] Organization Data Source
 - [x] Project data source
 - [x] Project resource
-- [ ] Rules Resource
+- [x] Rules Resource
 - [ ] Rules Data Source
 
 ## Usage
@@ -39,7 +39,7 @@ terraform {
 }
 
 provider "disruptive-technologies" {
-  url            = "https://api.disruptive-technologies.com/v2"
+  url            = "https://api.disruptive-technologies.com"
   token_endpoint = "https://identity.disruptive-technologies.com/oauth2/token"
 }
 ```
