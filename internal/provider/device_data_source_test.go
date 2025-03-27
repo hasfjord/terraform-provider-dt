@@ -16,15 +16,15 @@ func TestAccDeviceDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Read testing
 			{
-				Config: providerConfig + `data "dt_device" "test" {name = "projects/your-project-id/devices/your-device-id"}`,
+				Config: providerConfig + `data "dt_device" "test" {name = "projects/cvimk1al2ugc73b866qg/devices/emucvimqtt6bp6s7384t7t0"}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Verify number of coffees returned
-					resource.TestCheckResourceAttr("data.dt_device.test", "name", "projects/your-project-id/devices/your-device-id"),
-					resource.TestCheckResourceAttr("data.dt_device.test", "device_id", "your-device-id"),
-					resource.TestCheckResourceAttr("data.dt_device.test", "project_id", "your-project-id"),
+					resource.TestCheckResourceAttr("data.dt_device.test", "name", "projects/cvimk1al2ugc73b866qg/devices/emucvimqtt6bp6s7384t7t0"),
+					resource.TestCheckResourceAttr("data.dt_device.test", "device_id", "emucvimqtt6bp6s7384t7t0"),
+					resource.TestCheckResourceAttr("data.dt_device.test", "project_id", "cvimk1al2ugc73b866qg"),
 					resource.TestCheckResourceAttr("data.dt_device.test", "type", "temperature"),
-					resource.TestCheckResourceAttr("data.dt_device.test", "labels.%", "1"),
-					resource.TestCheckResourceAttr("data.dt_device.test", "labels.key", "value"),
+					resource.TestCheckResourceAttr("data.dt_device.test", "labels.%", "2"),
+					resource.TestCheckResourceAttr("data.dt_device.test", "labels.virtual-sensor", ""),
 				),
 			},
 		},

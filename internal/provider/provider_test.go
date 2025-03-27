@@ -3,7 +3,6 @@
 package provider
 
 import (
-	"net/http/httptest"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -25,19 +24,12 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// Start the test server
-	testDTServer := httptest.NewServer(newTestHandler())
-	defer testDTServer.Close()
-
 	providerConfig = `provider "dt" {
-email = "myServiceAccount@myProject.serviceaccount.d21s.com"
-key_id = "myKey"
-key_secret = "mySecret"
-token_endpoint = "` + testDTServer.URL + `/token"
-url = "` + testDTServer.URL + `"
-}
-
-`
+		url            = "https://api.disruptive-technologies.com"
+  		token_endpoint = "https://identity.disruptive-technologies.com/oauth2/token"
+	}
+	
+	`
 	logrus.WithField("providerConfig", providerConfig).Info("providerConfig")
 
 	// Run the tests
