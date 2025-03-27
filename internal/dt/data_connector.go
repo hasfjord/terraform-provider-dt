@@ -68,7 +68,7 @@ func (c *Client) GetDataConnector(ctx context.Context, dataConnector string) (Da
 		return DataConnector{}, err
 	}
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}/dataconnectors/{data_connector_id}
-	url := fmt.Sprintf("%s/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
+	url := fmt.Sprintf("%s/v2/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
 
 	// Send a GET request to the API
 	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
