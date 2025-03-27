@@ -16,15 +16,15 @@ func TestAccProjectDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Read testing
 			{
-				Config: providerConfig + `data "dt_project" "test" {name = "projects/cvimk1al2ugc73b866qg"}`,
+				Config: providerConfig + `data "dt_project" "test" {name = "projects/cvinutal2ugc73b866v0"}`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Verify number of coffees returned
-					resource.TestCheckResourceAttr("data.dt_project.test", "name", "projects/cvimk1al2ugc73b866qg"),
-					resource.TestCheckResourceAttr("data.dt_project.test", "id", "cvimk1al2ugc73b866qg"),
-					resource.TestCheckResourceAttr("data.dt_project.test", "display_name", "Terraform Provider DT Acceptance Tests"),
+					resource.TestCheckResourceAttr("data.dt_project.test", "name", "projects/cvinutal2ugc73b866v0"),
+					resource.TestCheckResourceAttr("data.dt_project.test", "id", "cvinutal2ugc73b866v0"),
+					resource.TestCheckResourceAttr("data.dt_project.test", "display_name", "manual"),
 					resource.TestCheckResourceAttr("data.dt_project.test", "inventory", "false"),
-					resource.TestCheckResourceAttr("data.dt_project.test", "organization", "organizations/c4nif0cqjh0g02hh4t10"),
-					resource.TestCheckResourceAttr("data.dt_project.test", "organization_display_name", "Thomas Hasfjord"),
+					resource.TestCheckResourceAttr("data.dt_project.test", "organization", "organizations/cvinmt9aq9sc738g6eog"),
+					resource.TestCheckResourceAttr("data.dt_project.test", "organization_display_name", "Terraform Provider Acceptance Test Org"),
 					resource.TestCheckResourceAttr("data.dt_project.test", "sensor_count", "1"),
 					resource.TestCheckResourceAttr("data.dt_project.test", "cloud_connector_count", "0"),
 				),
