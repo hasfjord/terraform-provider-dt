@@ -953,7 +953,7 @@ func smsConfigToState(ctx context.Context, smsConfig *dt.SMSConfig) (*smsConfigM
 
 	return &smsConfigModel{
 		Recipients: recipientsList,
-		Body:       types.StringValue(smsConfig.Message),
+		Body:       types.StringValue(smsConfig.Body),
 	}, diags
 }
 
@@ -1232,7 +1232,7 @@ func stateToSMSConfig(ctx context.Context, state *smsConfigModel) (*dt.SMSConfig
 
 	return &dt.SMSConfig{
 		Recipients: recipients,
-		Message:    state.Body.ValueString(),
+		Body:       state.Body.ValueString(),
 	}, diags
 }
 

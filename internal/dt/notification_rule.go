@@ -52,7 +52,7 @@ type NotificationAction struct {
 
 type SMSConfig struct {
 	Recipients []string `json:"recipients"`
-	Message    string   `json:"message"`
+	Body       string   `json:"body"`
 }
 
 type EmailConfig struct {
