@@ -45,6 +45,6 @@ func expandStringList(ctx context.Context, listValue basetypes.ListValue) ([]str
 }
 
 var durationValidator = stringvalidator.RegexMatches(
-	regexp.MustCompile(`^(\d+)([smh])$`),
-	"Duration must be in the format of <number><unit>, where unit is one of s, m, h.",
+	regexp.MustCompile(`^(\d+)([s])$`),
+	"Duration must be in the format of <number><unit>, where unit is 's' (seconds).",
 )

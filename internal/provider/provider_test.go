@@ -3,6 +3,9 @@
 package provider
 
 import (
+	"os"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
@@ -23,3 +26,14 @@ var (
 		"dt": providerserver.NewProtocol6WithError(New("test")()),
 	}
 )
+
+// notificationActionExample is a helper for getting the example tf file
+func readExampleFile(t *testing.T, filePath string) string {
+	t.Helper()
+	// Read the example file
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("failed to read example file: %v", err)
+	}
+	return string(content)
+}

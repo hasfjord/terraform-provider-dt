@@ -1,8 +1,8 @@
 # Copyright (c) HashiCorp, Inc.
 
-resource "dt_project" "provider_test_project" {
-  display_name = "Provider Test"
-  organization = "organizations/dt"
+resource "dt_project" "my_project" {
+  display_name = "Terraform created project"
+  organization = "organizations/cvinmt9aq9sc738g6eog"
   location = {
     // Hell, Norway
     latitude      = 63.44539

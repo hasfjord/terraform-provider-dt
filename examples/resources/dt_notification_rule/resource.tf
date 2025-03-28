@@ -1,14 +1,21 @@
 # Copyright (c) HashiCorp, Inc.
 
-resource "dt_notification_rule" "provider_test_notification_rule" {
+resource "dt_project" "my_project" {
+  display_name = "Notification Rule Acceptance Test Project"
+  organization = "organizations/cvinmt9aq9sc738g6eog"
+  location = {
+    time_location = "Europe/Oslo"
+  }
+}
+
+resource "dt_notification_rule" "my_notification_rule" {
   display_name = "Terraform created notification rule"
-  project_id   = "myProjectID"
+  project_id   = dt_project.my_project.id
   trigger = {
     field = "temperature"
     range = {
       lower = 0
       upper = 30
-
     }
   }
   escalation_levels = [
@@ -18,11 +25,11 @@ resource "dt_notification_rule" "provider_test_notification_rule" {
         {
           type = "EMAIL"
           email_config = {
-            body = "Temperature $celsius°c is out of range"
+            body = "Temperature $celsius°C is out of range"
             recipients = [
-              "this.guy@example.com"
+              "someone@example.com"
             ]
-            subject = "Temperature alert"
+            subject = "Temperature Alert"
           }
         }
       ]
