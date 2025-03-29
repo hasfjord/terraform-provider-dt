@@ -8,6 +8,7 @@ import (
 
 	"github.com/disruptive-technologies/terraform-provider-dt/internal/dt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -110,13 +112,24 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
+				Description: `An optional list of device resource names that this rule applies to.
+								If the list is empty, the rule applies to all devices in the project,
+								or those matching all the labels in device_labels (if present).`,
+				// Defaults to empty list
+				Default:    listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
+				Validators: []validator.List{listvalidator.SizeAtLeast(1)},
+			},
+			"device_labels": schema.MapAttribute{
+				Optional:    true,
+				Computed:    true,
+				ElementType: types.StringType,
 				Description: `An optional map of labels to use as a filter for which devices this rule applies to.
 								This applies regardless of whether or not the devices field is set. The map can contain
 								both label key/value pairs, or just label keys. If multiple labels are specified, the
 								device must match all of them to be included.`,
 				// Defaults to empty list
-				Default:    listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
-				Validators: []validator.List{listvalidator.SizeAtLeast(1)},
+				Default:    mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{})),
+				Validators: []validator.Map{mapvalidator.SizeAtLeast(1)},
 			},
 			"trigger": schema.SingleNestedAttribute{
 				Required:    true,
@@ -559,6 +572,7 @@ type notificationRuleModel struct {
 	DisplayName          types.String              `tfsdk:"display_name"`
 	ProjectID            types.String              `tfsdk:"project_id"`
 	Devices              types.List                `tfsdk:"devices"`
+	DeviceLabels         types.Map                 `tfsdk:"device_labels"`
 	Trigger              triggerModel              `tfsdk:"trigger"`
 	EscalationLevels     []escalationLevelModel    `tfsdk:"escalation_levels"`
 	Schedule             *scheduleModel            `tfsdk:"schedule"`
@@ -835,6 +849,9 @@ func notificationRuleToState(ctx context.Context, notificationRule dt.Notificati
 	devicesList, d := types.ListValueFrom(ctx, types.StringType, notificationRule.Devices)
 	diags = append(diags, d...)
 
+	deviceLabelsMap, d := types.MapValueFrom(ctx, types.StringType, notificationRule.DeviceLabels)
+	diags = append(diags, d...)
+
 	escalationLevels, d := escalationLevelToState(ctx, notificationRule.EscalationLevels)
 	diags = append(diags, d...)
 
@@ -858,6 +875,7 @@ func notificationRuleToState(ctx context.Context, notificationRule dt.Notificati
 	state.Enabled = types.BoolValue(notificationRule.Enabled)
 	state.DisplayName = types.StringValue(notificationRule.DisplayName)
 	state.Devices = devicesList
+	state.DeviceLabels = deviceLabelsMap
 	state.Trigger = triggerToState(notificationRule.Trigger)
 	state.EscalationLevels = escalationLevels
 	state.Schedule = scheduleToState(notificationRule.Schedule)
@@ -1123,6 +1141,10 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 	devices, d := expandStringList(ctx, state.Devices)
 	diags = append(diags, d...)
 
+	deviceLabels := make(map[string]string)
+	d = state.DeviceLabels.ElementsAs(ctx, &deviceLabels, false)
+	diags = append(diags, d...)
+
 	escalationLevels, d := stateToEscalationLevels(ctx, state.EscalationLevels)
 	diags = append(diags, d...)
 
@@ -1138,6 +1160,7 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 		Enabled:              state.Enabled.ValueBool(),
 		DisplayName:          state.DisplayName.ValueString(),
 		Devices:              devices,
+		DeviceLabels:         deviceLabels,
 		Trigger:              stateToTrigger(state.Trigger),
 		EscalationLevels:     escalationLevels,
 		Schedule:             schedule,
@@ -1292,7 +1315,7 @@ func stateToWebhookConfig(ctx context.Context, state *webhookConfigModel) (*dt.W
 	}
 
 	headers := make(map[string]string)
-	d := state.Headers.ElementsAs(ctx, headers, false)
+	d := state.Headers.ElementsAs(ctx, &headers, false)
 	diags = append(diags, d...)
 	if diags.HasError() {
 		return nil, diags

@@ -65,10 +65,13 @@ resource "dt_notification_rule" "my_notification_rule" {
 ### Optional
 
 - `actions` (Attributes List, Deprecated) The list of actions that will be executed when the trigger is met. (see [below for nested schema](#nestedatt--actions))
-- `devices` (List of String) An optional map of labels to use as a filter for which devices this rule applies to.
+- `device_labels` (Map of String) An optional map of labels to use as a filter for which devices this rule applies to.
 								This applies regardless of whether or not the devices field is set. The map can contain
 								both label key/value pairs, or just label keys. If multiple labels are specified, the
 								device must match all of them to be included.
+- `devices` (List of String) An optional list of device resource names that this rule applies to.
+								If the list is empty, the rule applies to all devices in the project,
+								or those matching all the labels in device_labels (if present).
 - `enabled` (Boolean) Whether or not the rule is enabled.
 - `escalation_levels` (Attributes List) A list of escalation levels that will be used throughout the lifecycle of alerts
     							that are created by this rule. The first escalation level will be used when the

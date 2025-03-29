@@ -19,7 +19,7 @@ type NotificationRule struct {
 	Enabled              bool              `json:"enabled"`
 	DisplayName          string            `json:"displayName"`
 	Devices              []string          `json:"devices"`
-	DeviceLables         map[string]string `json:"deviceLabels"`
+	DeviceLabels         map[string]string `json:"deviceLabels"`
 	Trigger              Trigger           `json:"trigger"`
 	EscalationLevels     []EscalationLevel `json:"escalationLevels"`
 	Schedule             *Schedule         `json:"schedule"`

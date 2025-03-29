@@ -59,6 +59,9 @@ func TestAccNotificationRuleResource(t *testing.T) {
 				resource "dt_notification_rule" "test" {
 					display_name = "Notification Rule Acceptance Test"
 					project_id = dt_project.test.id
+					device_labels = {
+						foo = "bar"
+					}
 					trigger = {
 						field = "temperature"
 						range = {
@@ -88,6 +91,8 @@ func TestAccNotificationRuleResource(t *testing.T) {
 				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Notification Rule Acceptance Test"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.%", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.foo", "bar"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "temperature"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.lower", "0"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.upper", "30"),
