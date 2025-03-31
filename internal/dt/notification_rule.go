@@ -109,9 +109,9 @@ type Trigger struct {
 }
 
 type Range struct {
-	Lower float64 `json:"lower"`
-	Upper float64 `json:"upper"`
-	Type  string  `json:"type"`
+	Lower *float64 `json:"lower"`
+	Upper *float64 `json:"upper"`
+	Type  string   `json:"type"`
 }
 
 type Schedule struct {

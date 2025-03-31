@@ -125,14 +125,11 @@ Read-Only:
 <a id="nestedatt--trigger--range"></a>
 ### Nested Schema for `trigger.range`
 
-Required:
+Optional:
 
 - `lower` (Number) The minimum value of the range.
-- `upper` (Number) The maximum value of the range.
-
-Read-Only:
-
 - `type` (String) The type of range to use. Must be one of `WITHIN` or `OUTSIDE`. Default is `WITHIN`.
+- `upper` (Number) The maximum value of the range.
 
 
 

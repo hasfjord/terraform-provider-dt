@@ -83,8 +83,8 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					trigger = {
 						field = "temperature"
 						range = {
-							lower = 0
 							upper = 30
+							type = "OUTSIDE"
 							}
 						}
 					escalation_levels =[
@@ -112,7 +112,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.%", "1"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.foo", "bar"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "temperature"),
-					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.lower", "0"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.type", "OUTSIDE"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.upper", "30"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.#", "1"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.display_name", "Escalation Level 1"),

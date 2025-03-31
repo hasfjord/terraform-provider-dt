@@ -144,14 +144,15 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 						Description: "The range of values that the data field has to be within or without for the criteria to be met.",
 						Attributes: map[string]schema.Attribute{
 							"lower": schema.Float64Attribute{
-								Required:    true,
+								Optional:    true,
 								Description: "The minimum value of the range.",
 							},
 							"upper": schema.Float64Attribute{
-								Required:    true,
+								Optional:    true,
 								Description: "The maximum value of the range.",
 							},
 							"type": schema.StringAttribute{
+								Optional: true,
 								Computed: true,
 								Description: fmt.Sprintf(
 									"The type of range to use. Must be one of `%s` or `%s`. Default is `%s`.",
@@ -1105,8 +1106,8 @@ func triggerToState(trigger dt.Trigger) triggerModel {
 
 	if trigger.Range != nil {
 		model.Range = &rangeModel{
-			Lower: types.Float64Value(trigger.Range.Lower),
-			Upper: types.Float64Value(trigger.Range.Upper),
+			Lower: types.Float64PointerValue(trigger.Range.Lower),
+			Upper: types.Float64PointerValue(trigger.Range.Upper),
 			Type:  types.StringValue(trigger.Range.Type),
 		}
 	}
@@ -1177,8 +1178,8 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 
 func stateToTrigger(state triggerModel) dt.Trigger {
 	criteriaRange := &dt.Range{
-		Lower: state.Range.Lower.ValueFloat64(),
-		Upper: state.Range.Upper.ValueFloat64(),
+		Lower: state.Range.Lower.ValueFloat64Pointer(),
+		Upper: state.Range.Upper.ValueFloat64Pointer(),
 		Type:  state.Range.Type.ValueString(),
 	}
 	return dt.Trigger{
