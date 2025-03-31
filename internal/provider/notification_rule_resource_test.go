@@ -62,6 +62,24 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					device_labels = {
 						foo = "bar"
 					}
+					schedule = {
+						timezone = "Europe/Oslo"
+						slots = [
+							{
+								day_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+								time_range = [{
+									start = {
+									hour   = 8
+									minute = 0
+									}
+									end = {
+									hour   = 20
+									minute = 0
+									}
+								}]
+							}
+						]
+					}	
 					trigger = {
 						field = "temperature"
 						range = {

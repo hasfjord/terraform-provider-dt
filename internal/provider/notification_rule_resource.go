@@ -52,13 +52,13 @@ const (
 	notificationActionPhoneCall      = "PHONE_CALL"
 	notificationActionSignalTower    = "SIGNAL_TOWER"
 
-	dayMonday    = "MONDAY"
-	dayTuesday   = "TUESDAY"
-	dayWednesday = "WEDNESDAY"
-	dayThursday  = "THURSDAY"
-	dayFriday    = "FRIDAY"
-	daySaturday  = "SATURDAY"
-	daySunday    = "SUNDAY"
+	dayMonday    = "Monday"
+	dayTuesday   = "Tuesday"
+	dayWednesday = "Wednesday"
+	dayThursday  = "Thursday"
+	dayFriday    = "Friday"
+	daySaturday  = "Saturday"
+	daySunday    = "Sunday"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -1072,11 +1072,14 @@ func scheduleToState(schedule *dt.Schedule) *scheduleModel {
 	scheduleModel := scheduleModel{}
 	scheduleModel.Timezone = types.StringValue(schedule.Timezone)
 
+	scheduleModel.Slots = make([]slotsModel, len(schedule.Slots))
 	for slotIndex, slot := range schedule.Slots {
+		scheduleModel.Slots[slotIndex].DayOfWeek = make([]types.String, len(slot.DaysOfWeek))
 		for dayIndex, day := range slot.DaysOfWeek {
 			scheduleModel.Slots[slotIndex].DayOfWeek[dayIndex] = types.StringValue(day)
 		}
 
+		scheduleModel.Slots[slotIndex].TimeRange = make([]timeRangeModel, len(slot.TimeRange))
 		for timeRangeIndex, timeRange := range slot.TimeRange {
 			scheduleModel.Slots[slotIndex].TimeRange[timeRangeIndex] = timeRangeModel{
 				Start: timeOfDayModel{

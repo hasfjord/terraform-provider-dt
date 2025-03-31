@@ -121,7 +121,7 @@ type Schedule struct {
 }
 
 type Slot struct {
-	DaysOfWeek []string    `json:"day"`
+	DaysOfWeek []string    `json:"days"`
 	TimeRange  []TimeRange `json:"times"`
 }
 

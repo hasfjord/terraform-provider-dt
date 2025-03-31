@@ -406,7 +406,7 @@ Optional:
 
 Required:
 
-- `day_of_week` (List of String) Day of week for the slot. Must be one of MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY, empty means every day
+- `day_of_week` (List of String) Day of week for the slot. Must be one of Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday, empty means every day
 
 Optional:
 
