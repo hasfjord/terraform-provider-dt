@@ -170,7 +170,8 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	tflog.Debug(ctx, "provider parameters")
 
 	client := dt.NewClient(dt.Config{
-		URL: url,
+		URL:     url,
+		Version: p.version,
 		Oidc: oidc.Config{
 			TokenEndpoint: tokenEndpoint,
 			ClientID:      keyID,
