@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"runtime"
 	"sync"
 	"time"
 
@@ -19,6 +20,7 @@ type Client struct {
 	httpClient http.Client
 	oidc       *oidc.Client
 	retryAfter *retryAfter
+	version    string
 }
 
 type retryAfter struct {
@@ -29,8 +31,9 @@ type retryAfter struct {
 }
 
 type Config struct {
-	Oidc oidc.Config
-	URL  string
+	Oidc    oidc.Config
+	URL     string
+	Version string
 }
 
 func NewClient(cfg Config) *Client {
@@ -42,6 +45,7 @@ func NewClient(cfg Config) *Client {
 			t:  time.Now(),
 			mu: sync.RWMutex{},
 		},
+		version: cfg.Version,
 	}
 }
 
@@ -95,6 +99,7 @@ func (c *Client) DoRequest(ctx context.Context, method, url string, body io.Read
 	}
 	request.Header.Set("Authorization", "Bearer "+token.AccessToken)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("User-Agent", fmt.Sprintf("TerraformProviderDT/%s(%s)", c.version, runtime.Version()))
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
