@@ -21,6 +21,7 @@ type Client struct {
 	oidc       *oidc.Client
 	retryAfter *retryAfter
 	version    string
+	cache      *ruleCache
 }
 
 type retryAfter struct {
@@ -46,6 +47,10 @@ func NewClient(cfg Config) *Client {
 			mu: sync.RWMutex{},
 		},
 		version: cfg.Version,
+		cache: &ruleCache{
+			notificationRules: make(map[string]NotificationRule),
+			mu:                sync.RWMutex{},
+		},
 	}
 }
 

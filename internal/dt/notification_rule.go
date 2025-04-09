@@ -9,9 +9,14 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 // DISCLAIMER: The Notification Rule API is not released yet and is subject to change.
+
+type ListNotificationRuleResponse struct {
+	NotificationRules []NotificationRule `json:"rules"`
+}
 
 // NotificationRule represents a notification rule in the Disruptive Technologies platform.
 type NotificationRule struct {
@@ -135,25 +140,71 @@ type TimeOfDay struct {
 	Minute int32 `json:"minute"`
 }
 
+type ruleCache struct {
+	notificationRules map[string]NotificationRule
+
+	mu sync.RWMutex
+}
+
+func (c *ruleCache) getRule(rule string) (NotificationRule, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if rule, ok := c.notificationRules[rule]; ok {
+		return rule, true
+	}
+	return NotificationRule{}, false
+}
+
+func (c *ruleCache) setRule(rule NotificationRule) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.notificationRules[rule.Name] = rule
+}
+
 // GetNotificationRule returns a notification rule by resource name.
 func (c *Client) GetNotificationRule(ctx context.Context, name string) (NotificationRule, error) {
-	projectID, ruleID, err := ParseResourceName(name)
+	// Try to get the rule from the cache first:
+	if rule, ok := c.cache.getRule(name); ok {
+		return rule, nil
+	}
+
+	// If the rule is not in the cache, we need to parse the resource name
+	projectID, _, err := ParseResourceName(name)
 	if err != nil {
 		return NotificationRule{}, fmt.Errorf("dt: failed to parse resource name: %w", err)
 	}
 
-	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules/%s", strings.TrimSuffix(c.URL, "/"), projectID, ruleID)
-	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
+	// make a list request to get all rules in the project and populate the cache.
+	response, err := c.listNotificationRules(ctx, projectID)
 	if err != nil {
-		return NotificationRule{}, fmt.Errorf("dt: failed to get notification rule: %w", err)
+		return NotificationRule{}, fmt.Errorf("dt: failed to list notification rules: %w", err)
+	}
+	for _, rule := range response.NotificationRules {
+		c.cache.setRule(rule)
 	}
 
-	var rule NotificationRule
-	if err := json.Unmarshal(responseBody, &rule); err != nil {
-		return NotificationRule{}, fmt.Errorf("dt: failed to unmarshal notification rule: %w", err)
+	// Now that the cache is populated, we can get the rule by name
+	rule, ok := c.cache.getRule(name)
+	if !ok {
+		return NotificationRule{}, fmt.Errorf("dt: notification rule not found: %s", name)
 	}
 
 	return rule, nil
+}
+
+func (c *Client) listNotificationRules(ctx context.Context, projectID string) (ListNotificationRuleResponse, error) {
+	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules", strings.TrimSuffix(c.URL, "/"), projectID)
+	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return ListNotificationRuleResponse{}, fmt.Errorf("dt: failed to list notification rules: %w", err)
+	}
+
+	var rules ListNotificationRuleResponse
+	if err := json.Unmarshal(responseBody, &rules); err != nil {
+		return ListNotificationRuleResponse{}, fmt.Errorf("dt: failed to unmarshal notification rules: %w", err)
+	}
+
+	return rules, nil
 }
 
 // CreateNotificationRule creates a new notification rule.
