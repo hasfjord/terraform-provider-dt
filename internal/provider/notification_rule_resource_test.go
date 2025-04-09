@@ -62,6 +62,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					device_labels = {
 						foo = "bar"
 					}
+					resolved_notification = true
 					schedule = {
 						timezone = "Europe/Oslo"
 						slots = [
@@ -111,6 +112,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Notification Rule Acceptance Test"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.%", "1"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.foo", "bar"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "resolved_notification", "true"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "temperature"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.type", "OUTSIDE"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.upper", "30"),

@@ -78,6 +78,7 @@ resource "dt_notification_rule" "my_notification_rule" {
     							alert is triggered, and the next escalation level will be used when the alert is
     							escalated, and so on. Each escalation level needs at least one action, and there
     							needs to be at least one escalation level. (see [below for nested schema](#nestedatt--escalation_levels))
+- `resolved_notification` (Boolean) Whether or not to send a resolved notifications
 - `schedule` (Attributes) A schedule limits at what times the rule will be evaluated, and events will be processed. 
 								When an event is received outside the schedule, the device will never be put on the delay
 								queue, and a trigger counter (if enabled) will not be incremented. (see [below for nested schema](#nestedatt--schedule))
@@ -96,7 +97,6 @@ resource "dt_notification_rule" "my_notification_rule" {
 - `name` (String) The resource name of the rule. The resource name has the following format: "projects/{project_id}/rules/{rule_id}". 
 							 	The name is ignored when creating a new rule.
 - `reminder_notification` (Boolean) Whether or not to send a reminder notifications
-- `resolved_notification` (Boolean) Whether or not to send a resolved notifications
 
 <a id="nestedatt--trigger"></a>
 ### Nested Schema for `trigger`
