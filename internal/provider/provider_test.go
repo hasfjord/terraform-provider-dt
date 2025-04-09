@@ -27,8 +27,8 @@ var (
 	}
 )
 
-// notificationActionExample is a helper for getting the example tf file
-func readExampleFile(t *testing.T, filePath string) string {
+// notificationActionExample is a helper for reading the test .tf file
+func readTestFile(t *testing.T, filePath string) string {
 	t.Helper()
 	// Read the example file
 	content, err := os.ReadFile(filePath)

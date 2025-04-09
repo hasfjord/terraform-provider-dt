@@ -16,7 +16,7 @@ func TestAccProjectResourceExamples(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and read testing
 			{
-				Config: providerConfig + readExampleFile(t, "../../examples/resources/dt_project/resource.tf"),
+				Config: providerConfig + readTestFile(t, "../../examples/resources/dt_project/resource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_project.my_project", "display_name", "Terraform created project"),
 					resource.TestCheckResourceAttr("dt_project.my_project", "location.latitude", "63.44539"),

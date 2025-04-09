@@ -61,6 +61,21 @@ const (
 	daySunday    = "Sunday"
 )
 
+var (
+	fields = []string{
+		"temperature",
+		"co2",
+		"relativeHumidity",
+		"waterPresent",
+		"contact",
+		"motion",
+		"touch",
+		"objectPresent",
+		"deskOccupancy",
+		"connectionStatus",
+	}
+)
+
 // Ensure the implementation satisfies the expected interfaces.
 var (
 	_ resource.Resource              = &notificationRuleResource{}
@@ -138,6 +153,7 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 					"field": schema.StringAttribute{
 						Required:    true,
 						Description: "The data field to use for the criteria.",
+						Validators:  []validator.String{stringvalidator.OneOf(fields...)},
 					},
 					"range": schema.SingleNestedAttribute{
 						Optional:    true,
@@ -1177,14 +1193,8 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 }
 
 func stateToTrigger(state triggerModel) dt.Trigger {
-	criteriaRange := &dt.Range{
-		Lower: state.Range.Lower.ValueFloat64Pointer(),
-		Upper: state.Range.Upper.ValueFloat64Pointer(),
-		Type:  state.Range.Type.ValueString(),
-	}
-	return dt.Trigger{
+	trigger := dt.Trigger{
 		Field:        state.Field.ValueString(),
-		Range:        criteriaRange,
 		Presence:     state.Presence.ValueStringPointer(),
 		Motion:       state.Motion.ValueStringPointer(),
 		Occupancy:    state.Occupancy.ValueStringPointer(),
@@ -1192,6 +1202,16 @@ func stateToTrigger(state triggerModel) dt.Trigger {
 		Contact:      state.Contact.ValueStringPointer(),
 		TriggerCount: state.TriggerCount.ValueInt32(),
 	}
+	if state.Range == nil {
+		return trigger
+	}
+
+	trigger.Range = &dt.Range{
+		Lower: state.Range.Lower.ValueFloat64Pointer(),
+		Upper: state.Range.Upper.ValueFloat64Pointer(),
+		Type:  state.Range.Type.ValueString(),
+	}
+	return trigger
 }
 
 func stateToEscalationLevels(ctx context.Context, state []escalationLevelModel) ([]dt.EscalationLevel, diag.Diagnostics) {

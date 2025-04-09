@@ -28,7 +28,7 @@ func TestAccNotificationRulesResourceExamples(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and read testing
 			{
-				Config: providerConfig + readExampleFile(t, "../../examples/resources/dt_notification_rule/resource.tf"),
+				Config: providerConfig + readTestFile(t, "../../examples/resources/dt_notification_rule/resource.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "display_name", "Terraform created notification rule"),
 					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "trigger.field", "temperature"),
@@ -55,58 +55,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and read testing
 			{
-				Config: notificationRuleProviderConfig + `
-				resource "dt_notification_rule" "test" {
-					display_name = "Notification Rule Acceptance Test"
-					project_id = dt_project.test.id
-					device_labels = {
-						foo = "bar"
-					}
-					schedule = {
-						timezone = "Europe/Oslo"
-						slots = [
-							{
-								day_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-								time_range = [{
-									start = {
-									hour   = 8
-									minute = 0
-									}
-									end = {
-									hour   = 20
-									minute = 0
-									}
-								}]
-							}
-						]
-					}	
-					trigger = {
-						field = "temperature"
-						range = {
-							upper = 30
-							type = "OUTSIDE"
-							}
-						}
-					escalation_levels =[
-						{
-							display_name = "Escalation Level 1"
-							actions = [
-								{
-									type = "EMAIL"
-									email_config = {
-										body = "Temperature $celsius is out of range"
-										recipients = [
-											"this.guy@example.com"
-										]
-										subject = "Temperature Alert"
-									}
-								}
-							]
-						}
-					]
-				}
-
-				`,
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/with_schedule.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Notification Rule Acceptance Test"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.%", "1"),
@@ -127,52 +76,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 			},
 			// Update and read testing
 			{
-				Config: notificationRuleProviderConfig + `
-				resource "dt_notification_rule" "test" {
-					display_name = "Notification Rule Acceptance Test Updated"
-					project_id = dt_project.test.id
-					trigger = {
-						field = "temperature"
-						range = {
-							lower = 0
-							upper = 35
-						}
-					}
-					escalation_levels =[
-						{
-							display_name = "Escalation Level 1"
-							actions = [
-								{
-									type = "EMAIL"
-									email_config = {
-										body = "Temperature $celsius is out of range"
-										recipients = [
-											"this.guy@example.com"
-										]
-										subject = "Temperature Alert"
-									}
-								}
-							]
-							escalate_after = "3600s"
-						},
-						{
-							display_name = "Escalation Level 2"
-							actions = [
-								{
-									type = "SMS"
-									sms_config = {
-										body = "Temperature $celsius is out of range"
-										recipients = [
-											"+4798765432"
-										]
-									}
-								}
-							]
-						}
-					]
-				}
-
-				`,
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/email_sms_escalation.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Notification Rule Acceptance Test Updated"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "temperature"),
@@ -192,6 +96,26 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.1.actions.0.sms_config.body", "Temperature $celsius is out of range"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.1.actions.0.sms_config.recipients.#", "1"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.1.actions.0.sms_config.recipients.0", "+4798765432"),
+				),
+			},
+		},
+	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/offline_trigger.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Cloud connector offline"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "connectionStatus"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.connection", "CLOUD_CONNECTOR_OFFLINE"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.display_name", "Escalation Level 1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.type", "EMAIL"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.body", "Cloud connector is offline"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.subject", "Cloud connector offline alert"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.0", "this.guy@example.com"),
 				),
 			},
 		},
