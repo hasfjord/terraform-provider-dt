@@ -142,4 +142,28 @@ func TestAccNotificationRuleResource(t *testing.T) {
 			},
 		},
 	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and read testing
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/disabled_rule.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "display_name", "Disabled notification rule"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "enabled", "false"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "trigger.field", "temperature"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "trigger.range.lower", "0"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "trigger.range.upper", "30"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.display_name", "Escalation Level 1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.actions.0.type", "EMAIL"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.actions.0.email_config.body", "Temperature $celsius°C is out of range"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.actions.0.email_config.subject", "Temperature Alert"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.actions.0.email_config.recipients.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "escalation_levels.0.actions.0.email_config.recipients.0", "someone@example.com"),
+				),
+			},
+		},
+	})
 }
