@@ -105,7 +105,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/offline_trigger.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/ccon_offline_trigger.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Cloud connector offline"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "connectionStatus"),
@@ -115,6 +115,27 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.type", "EMAIL"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.body", "Cloud connector is offline"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.subject", "Cloud connector offline alert"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.0", "this.guy@example.com"),
+				),
+			},
+		},
+	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/sensor_offline_trigger.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Sensor offline"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "connectionStatus"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.connection", "SENSOR_OFFLINE"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger_delay", "900s"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.display_name", "Escalation Level 1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.type", "EMAIL"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.body", "Sensor $name is offline"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.subject", "Sensor offline alert"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.#", "1"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.0", "this.guy@example.com"),
 				),
