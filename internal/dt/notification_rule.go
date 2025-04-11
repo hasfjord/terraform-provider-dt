@@ -140,13 +140,13 @@ type TimeOfDay struct {
 	Minute int32 `json:"minute"`
 }
 
-type ruleCache struct {
+type rulesCache struct {
 	notificationRules map[string]NotificationRule
 
 	mu sync.RWMutex
 }
 
-func (c *ruleCache) getRule(rule string) (NotificationRule, bool) {
+func (c *rulesCache) getRule(rule string) (NotificationRule, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if rule, ok := c.notificationRules[rule]; ok {
@@ -155,7 +155,7 @@ func (c *ruleCache) getRule(rule string) (NotificationRule, bool) {
 	return NotificationRule{}, false
 }
 
-func (c *ruleCache) setRule(rule NotificationRule) {
+func (c *rulesCache) setRule(rule NotificationRule) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.notificationRules[rule.Name] = rule
@@ -164,7 +164,7 @@ func (c *ruleCache) setRule(rule NotificationRule) {
 // GetNotificationRule returns a notification rule by resource name.
 func (c *Client) GetNotificationRule(ctx context.Context, name string) (NotificationRule, error) {
 	// Try to get the rule from the cache first:
-	if rule, ok := c.cache.getRule(name); ok {
+	if rule, ok := c.rulesCache.getRule(name); ok {
 		return rule, nil
 	}
 
@@ -180,11 +180,11 @@ func (c *Client) GetNotificationRule(ctx context.Context, name string) (Notifica
 		return NotificationRule{}, fmt.Errorf("dt: failed to list notification rules: %w", err)
 	}
 	for _, rule := range response.NotificationRules {
-		c.cache.setRule(rule)
+		c.rulesCache.setRule(rule)
 	}
 
 	// Now that the cache is populated, we can get the rule by name
-	rule, ok := c.cache.getRule(name)
+	rule, ok := c.rulesCache.getRule(name)
 	if !ok {
 		return NotificationRule{}, fmt.Errorf("dt: notification rule not found: %s", name)
 	}

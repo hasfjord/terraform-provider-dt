@@ -9,7 +9,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 )
+
+type ListProjectResponse struct {
+	Projects []Project `json:"projects"`
+}
 
 type Project struct {
 	Name                    string   `json:"name"`
@@ -32,29 +37,69 @@ type Location struct {
 	TimeLocation string  `json:"timeLocation"`
 }
 
+type projectCache struct {
+	projects map[string]Project
+
+	mu sync.RWMutex
+}
+
+func (c *projectCache) getProject(name string) (Project, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if project, ok := c.projects[name]; ok {
+		return project, true
+	}
+	return Project{}, false
+}
+
+func (c *projectCache) setProject(project Project) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.projects[project.Name] = project
+}
+
 func (c *Client) GetProject(ctx context.Context, projectName string) (Project, error) {
-	// Get the project ID from the project name
-	projectID, err := idFromProject(projectName)
-	if err != nil {
-		return Project{}, fmt.Errorf("failed to get project ID: %w", err)
+	// first check if the project is in the cache
+	if project, ok := c.projectCache.getProject(projectName); ok {
+		return project, nil
 	}
 
-	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
-	url := fmt.Sprintf("%s/v2/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
+	// call the API to get all the projects in the org and populate the cache
+	projects, err := c.listProjects(ctx)
+	if err != nil {
+		return Project{}, fmt.Errorf("failed to list projects: %w", err)
+	}
+
+	// populate the cache with the projects
+	for _, project := range projects.Projects {
+		c.projectCache.setProject(project)
+	}
+	// Now that the cache is populated, we can get the project by name
+	project, ok := c.projectCache.getProject(projectName)
+	if !ok {
+		return Project{}, fmt.Errorf("project not found: %s", projectName)
+	}
+
+	return project, nil
+}
+
+func (c *Client) listProjects(ctx context.Context) (ListProjectResponse, error) {
+	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects
+	url := fmt.Sprintf("%s/v2/projects", strings.TrimSuffix(c.URL, "/"))
 
 	// Send a GET request to the API
 	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return Project{}, err
+		return ListProjectResponse{}, err
 	}
 
-	var p Project
-	err = json.Unmarshal(responseBody, &p)
+	var projects ListProjectResponse
+	err = json.Unmarshal(responseBody, &projects)
 	if err != nil {
-		return Project{}, err
+		return ListProjectResponse{}, err
 	}
 
-	return p, nil
+	return projects, nil
 }
 
 func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, error) {

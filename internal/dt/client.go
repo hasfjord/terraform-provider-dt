@@ -16,12 +16,13 @@ import (
 )
 
 type Client struct {
-	URL        string
-	httpClient http.Client
-	oidc       *oidc.Client
-	retryAfter *retryAfter
-	version    string
-	cache      *ruleCache
+	URL          string
+	httpClient   http.Client
+	oidc         *oidc.Client
+	retryAfter   *retryAfter
+	version      string
+	rulesCache   *rulesCache
+	projectCache *projectCache
 }
 
 type retryAfter struct {
@@ -47,9 +48,13 @@ func NewClient(cfg Config) *Client {
 			mu: sync.RWMutex{},
 		},
 		version: cfg.Version,
-		cache: &ruleCache{
+		rulesCache: &rulesCache{
 			notificationRules: make(map[string]NotificationRule),
 			mu:                sync.RWMutex{},
+		},
+		projectCache: &projectCache{
+			projects: make(map[string]Project),
+			mu:       sync.RWMutex{},
 		},
 	}
 }
