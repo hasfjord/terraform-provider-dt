@@ -88,7 +88,7 @@ func (c *Client) createJWT() (string, error) {
 	}
 
 	// Construct the JWT payload.
-	now := time.Now()
+	now := time.Now().Add(-time.Second * 5) // Subtract 5 seconds to account for clock skew.
 	jwtPayload := &jwt.RegisteredClaims{
 		Issuer:    c.email,
 		Audience:  jwt.ClaimStrings{c.tokenEndpoint},

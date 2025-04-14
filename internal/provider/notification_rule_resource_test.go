@@ -102,6 +102,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		},
 	})
 	resource.Test(t, resource.TestCase{
+		// Test case for the ccon offline trigger
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -122,6 +123,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		},
 	})
 	resource.Test(t, resource.TestCase{
+		// Test case for the sensor offline trigger
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -145,7 +147,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and read testing
+			// Test case for the disabled rule
 			{
 				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/disabled_rule.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(

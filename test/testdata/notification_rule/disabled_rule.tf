@@ -1,3 +1,5 @@
+# Copyright (c) HashiCorp, Inc.
+
 resource "dt_notification_rule" "my_notification_rule" {
   display_name = "Disabled notification rule"
   enabled      = false
