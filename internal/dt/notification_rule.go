@@ -70,6 +70,7 @@ type CorrigoConfig struct {
 	AssetID              string `json:"assetId"`
 	TaskID               string `json:"taskId"`
 	CustomerID           string `json:"customerId"`
+	ClientID             string `json:"clientId"`
 	ClientSecret         string `json:"clientSecret"`
 	CompanyName          string `json:"companyName"`
 	SubTypeID            string `json:"subTypeId"`

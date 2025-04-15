@@ -156,6 +156,7 @@ Optional:
 Required:
 
 - `asset_id` (String) The asset ID of the device.
+- `client_id` (String) The client ID of the device.
 - `client_secret` (String, Sensitive) The client secret of the device.
 - `company_name` (String) The company name of the device.
 - `contact_address` (String) The contact address of the device.
@@ -288,6 +289,7 @@ Optional:
 Required:
 
 - `asset_id` (String) The asset ID of the device.
+- `client_id` (String) The client ID of the device.
 - `client_secret` (String, Sensitive) The client secret of the device.
 - `company_name` (String) The company name of the device.
 - `contact_address` (String) The contact address of the device.

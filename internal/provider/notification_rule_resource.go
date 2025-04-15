@@ -458,6 +458,10 @@ var notificationAction = schema.NestedAttributeObject{
 					Required:    true,
 					Description: "The customer ID of the device.",
 				},
+				"client_id": schema.StringAttribute{
+					Required:    true,
+					Description: "The client ID of the device.",
+				},
 				"client_secret": schema.StringAttribute{
 					Required:    true,
 					Description: "The client secret of the device.",
@@ -633,6 +637,7 @@ type corrigoConfigModel struct {
 	AssetID              types.String `tfsdk:"asset_id"`
 	TaskID               types.String `tfsdk:"task_id"`
 	CustomerID           types.String `tfsdk:"customer_id"`
+	ClientID             types.String `tfsdk:"client_id"`
 	ClientSecret         types.String `tfsdk:"client_secret"`
 	CompanyName          types.String `tfsdk:"company_name"`
 	SubTypeID            types.String `tfsdk:"sub_type_id"`
@@ -1018,6 +1023,7 @@ func corrigoConfigToState(corrigoConfig *dt.CorrigoConfig) *corrigoConfigModel {
 		AssetID:              types.StringValue(corrigoConfig.AssetID),
 		TaskID:               types.StringValue(corrigoConfig.TaskID),
 		CustomerID:           types.StringValue(corrigoConfig.CustomerID),
+		ClientID:             types.StringValue(corrigoConfig.ClientID),
 		ClientSecret:         types.StringValue(corrigoConfig.ClientSecret),
 		CompanyName:          types.StringValue(corrigoConfig.CompanyName),
 		SubTypeID:            types.StringValue(corrigoConfig.SubTypeID),
@@ -1310,6 +1316,7 @@ func stateToCorrigoConfig(state *corrigoConfigModel) *dt.CorrigoConfig {
 		AssetID:              state.AssetID.ValueString(),
 		TaskID:               state.TaskID.ValueString(),
 		CustomerID:           state.CustomerID.ValueString(),
+		ClientID:             state.ClientID.String(),
 		ClientSecret:         state.ClientSecret.ValueString(),
 		CompanyName:          state.CompanyName.ValueString(),
 		SubTypeID:            state.SubTypeID.ValueString(),

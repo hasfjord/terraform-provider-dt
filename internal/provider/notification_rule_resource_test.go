@@ -168,4 +168,14 @@ func TestAccNotificationRuleResource(t *testing.T) {
 			},
 		},
 	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Test case for the disabled rule
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/all_escalations.tf"),
+				Check:  resource.ComposeAggregateTestCheckFunc(),
+			},
+		},
+	})
 }
