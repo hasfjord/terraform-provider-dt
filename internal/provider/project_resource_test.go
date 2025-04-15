@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccProjectResourceExamples(t *testing.T) {
@@ -54,6 +55,15 @@ func TestAccProjectResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_project.test", "location.time_location", "Europe/Oslo"),
 					resource.TestCheckResourceAttr("dt_project.test", "inventory", "false"),
 				),
+			},
+			{
+				// Import testing
+				ResourceName:      "dt_project.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
+					return state.RootModule().Resources["dt_project.test"].Primary.Attributes["name"], nil
+				},
 			},
 		},
 	})
