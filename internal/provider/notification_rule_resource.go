@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -78,8 +79,9 @@ var (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &notificationRuleResource{}
-	_ resource.ResourceWithConfigure = &notificationRuleResource{}
+	_ resource.Resource                = &notificationRuleResource{}
+	_ resource.ResourceWithConfigure   = &notificationRuleResource{}
+	_ resource.ResourceWithImportState = &notificationRuleResource{}
 )
 
 // NewDataConnectorResource is a helper function to simplify the provider implementation.
@@ -95,6 +97,11 @@ type notificationRuleResource struct {
 // Metadata returns the resource type name.
 func (r *notificationRuleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_notification_rule"
+}
+
+func (r *notificationRuleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
 // Schema defines the schema for the resource.
@@ -595,7 +602,7 @@ type notificationRuleModel struct {
 	ProjectID            types.String              `tfsdk:"project_id"`
 	Devices              types.List                `tfsdk:"devices"`
 	DeviceLabels         types.Map                 `tfsdk:"device_labels"`
-	Trigger              triggerModel              `tfsdk:"trigger"`
+	Trigger              *triggerModel             `tfsdk:"trigger"`
 	EscalationLevels     []escalationLevelModel    `tfsdk:"escalation_levels"`
 	Schedule             *scheduleModel            `tfsdk:"schedule"`
 	TriggerDelay         types.String              `tfsdk:"trigger_delay"`
@@ -1121,7 +1128,7 @@ func scheduleToState(schedule *dt.Schedule) *scheduleModel {
 	return &scheduleModel
 }
 
-func triggerToState(trigger dt.Trigger) triggerModel {
+func triggerToState(trigger dt.Trigger) *triggerModel {
 
 	model := triggerModel{
 		Field: types.StringValue(trigger.Field),
@@ -1160,7 +1167,7 @@ func triggerToState(trigger dt.Trigger) triggerModel {
 		model.TriggerCount = types.Int32Null()
 	}
 
-	return model
+	return &model
 }
 
 func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (dt.NotificationRule, diag.Diagnostics) {
@@ -1199,7 +1206,10 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 	}, diags
 }
 
-func stateToTrigger(state triggerModel) dt.Trigger {
+func stateToTrigger(state *triggerModel) dt.Trigger {
+	if state == nil {
+		return dt.Trigger{}
+	}
 	trigger := dt.Trigger{
 		Field:        state.Field.ValueString(),
 		Presence:     state.Presence.ValueStringPointer(),

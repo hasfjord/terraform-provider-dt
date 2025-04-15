@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 // Setup separate project for the test.
@@ -74,6 +75,16 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.recipients.0", "this.guy@example.com"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.email_config.subject", "Temperature Alert"),
 				),
+			},
+			// Import testing
+			{
+				ResourceName:                         "dt_notification_rule.test",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
+					return state.RootModule().Resources["dt_notification_rule.test"].Primary.Attributes["name"], nil
+				},
 			},
 			// Update and read testing
 			{

@@ -58,9 +58,10 @@ func TestAccProjectResource(t *testing.T) {
 			},
 			{
 				// Import testing
-				ResourceName:      "dt_project.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:                         "dt_project.test",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
 				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					return state.RootModule().Resources["dt_project.test"].Primary.Attributes["name"], nil
 				},

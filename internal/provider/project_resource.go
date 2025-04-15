@@ -42,7 +42,6 @@ func (r *projectResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *projectResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
-	fmt.Printf("Importing project with ID: %s\n", req.ID)
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
