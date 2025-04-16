@@ -49,6 +49,11 @@ func (p *DTProvider) Schema(ctx context.Context, req provider.SchemaRequest, res
 				// Can use either environment variables or configuration, therefore optional: true
 				Optional: true,
 			},
+			"emulator_url": schema.StringAttribute{
+				Description: "The URL of the emulator server.",
+				// Can use either environment variables or configuration, therefore optional: true
+				Optional: true,
+			},
 			"key_id": schema.StringAttribute{
 				Description: "The key ID from the service account.",
 				// Can use either environment variables or configuration, therefore optional: true
@@ -76,7 +81,9 @@ func (p *DTProvider) Schema(ctx context.Context, req provider.SchemaRequest, res
 
 // hashicupsProviderModel maps provider schema data to a Go type.
 type dtProviderModel struct {
-	URL           types.String `tfsdk:"url"`
+	URL         types.String `tfsdk:"url"`
+	EmulatorURL types.String `tfsdk:"emulator_url"`
+	// OIDC
 	ClientID      types.String `tfsdk:"key_id"`
 	ClientSecret  types.String `tfsdk:"key_secret"`
 	TokenEndpoint types.String `tfsdk:"token_endpoint"`
@@ -102,6 +109,14 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 			)
 		} else {
 			url = config.URL.ValueString()
+		}
+	}
+	emulatorURL := os.Getenv("DT_EMULATOR_URL")
+	if emulatorURL == "" {
+		if config.EmulatorURL.IsUnknown() {
+			emulatorURL = "https://emulator.disruptive-technologies.com/"
+		} else {
+			emulatorURL = config.EmulatorURL.ValueString()
 		}
 	}
 
@@ -170,8 +185,9 @@ func (p *DTProvider) Configure(ctx context.Context, req provider.ConfigureReques
 	tflog.Debug(ctx, "provider parameters")
 
 	client := dt.NewClient(dt.Config{
-		URL:     url,
-		Version: p.version,
+		URL:         url,
+		EmulatorURL: emulatorURL,
+		Version:     p.version,
 		Oidc: oidc.Config{
 			TokenEndpoint: tokenEndpoint,
 			ClientID:      keyID,
@@ -191,6 +207,7 @@ func (p *DTProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewProjectResource,
 		NewDataConnectorResource,
 		NewNotificationRuleResource,
+		NewEmulatorResource,
 	}
 }
 

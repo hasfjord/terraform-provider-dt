@@ -17,6 +17,7 @@ import (
 
 type Client struct {
 	URL          string
+	EmulatorURL  string
 	httpClient   http.Client
 	oidc         *oidc.Client
 	retryAfter   *retryAfter
@@ -33,16 +34,18 @@ type retryAfter struct {
 }
 
 type Config struct {
-	Oidc    oidc.Config
-	URL     string
-	Version string
+	Oidc        oidc.Config
+	URL         string
+	EmulatorURL string
+	Version     string
 }
 
 func NewClient(cfg Config) *Client {
 	return &Client{
-		URL:        cfg.URL,
-		httpClient: *http.DefaultClient,
-		oidc:       oidc.NewClient(cfg.Oidc),
+		URL:         cfg.URL,
+		EmulatorURL: cfg.EmulatorURL,
+		httpClient:  *http.DefaultClient,
+		oidc:        oidc.NewClient(cfg.Oidc),
 		retryAfter: &retryAfter{
 			t:  time.Now(),
 			mu: sync.RWMutex{},
