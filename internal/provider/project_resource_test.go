@@ -37,17 +37,7 @@ func TestAccProjectResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create and read testing
-				Config: providerConfig + `resource "dt_project" "test" {
-					display_name = "Acceptance Test Project"
-					organization = "organizations/cvinmt9aq9sc738g6eog"
-					location = {
-						latitude = 63.44539
-						longitude = 10.910202
-						time_location = "Europe/Oslo"
-					}
-				}
-				
-				`,
+				Config: providerConfig + readTestFile(t, "../../test/testdata/project/with_location.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_project.test", "display_name", "Acceptance Test Project"),
 					resource.TestCheckResourceAttr("dt_project.test", "location.latitude", "63.44539"),
@@ -65,6 +55,21 @@ func TestAccProjectResource(t *testing.T) {
 				ImportStateIdFunc: func(state *terraform.State) (string, error) {
 					return state.RootModule().Resources["dt_project.test"].Primary.Attributes["name"], nil
 				},
+			},
+		},
+	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: providerConfig + readTestFile(t, "../../test/testdata/project/empty_location.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_project.test", "display_name", "Empty Location Project"),
+					resource.TestCheckResourceAttr("dt_project.test", "location.latitude", "0"),
+					resource.TestCheckResourceAttr("dt_project.test", "location.longitude", "0"),
+					resource.TestCheckResourceAttr("dt_project.test", "location.time_location", "UTC"),
+					resource.TestCheckResourceAttr("dt_project.test", "inventory", "false"),
+				),
 			},
 		},
 	})

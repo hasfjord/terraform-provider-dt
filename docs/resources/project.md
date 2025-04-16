@@ -48,11 +48,8 @@ resource "dt_project" "my_project" {
 <a id="nestedatt--location"></a>
 ### Nested Schema for `location`
 
-Required:
-
-- `time_location` (String) The time location of the project. This is used to determine the time zone of the project. For example, `Europe/Oslo`.
-
 Optional:
 
 - `latitude` (Number) The latitude of the project in Degrees Decimal. This is used to determine the time zone of the project.
 - `longitude` (Number) The longitude of the project in Degrees Decimal. This is used to determine the time zone of the project.
+- `time_location` (String) The time location of the project. This is used to determine the time zone of the project. For example, `Europe/Oslo`.

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -113,8 +114,10 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						Description: "The longitude of the project in Degrees Decimal. This is used to determine the time zone of the project.",
 					},
 					"time_location": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
+						Computed:    true,
 						Description: "The time location of the project. This is used to determine the time zone of the project. For example, `Europe/Oslo`.",
+						Default:     stringdefault.StaticString("UTC"),
 					},
 				},
 			},
