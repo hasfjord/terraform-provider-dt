@@ -37,7 +37,7 @@ func TestAccProjectResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create and read testing
-				Config: providerConfig + readTestFile(t, "../../test/testdata/project/with_location.tf"),
+				Config: providerConfig + readTestFile(t, "../../testdata/project/with_location.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_project.test", "display_name", "Acceptance Test Project"),
 					resource.TestCheckResourceAttr("dt_project.test", "location.latitude", "63.44539"),
@@ -62,7 +62,7 @@ func TestAccProjectResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: providerConfig + readTestFile(t, "../../test/testdata/project/empty_location.tf"),
+				Config: providerConfig + readTestFile(t, "../../testdata/project/empty_location.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_project.test", "display_name", "Empty Location Project"),
 					resource.TestCheckResourceAttr("dt_project.test", "location.latitude", "0"),

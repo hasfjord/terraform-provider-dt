@@ -56,7 +56,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and read testing
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/with_schedule.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/with_schedule.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Notification Rule Acceptance Test"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "device_labels.%", "1"),
@@ -88,7 +88,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 			},
 			// Update and read testing
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/email_sms_escalation.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/email_sms_escalation.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Notification Rule Acceptance Test Updated"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "temperature"),
@@ -117,7 +117,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/ccon_offline_trigger.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/ccon_offline_trigger.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Cloud connector offline"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "connectionStatus"),
@@ -138,7 +138,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/sensor_offline_trigger.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/sensor_offline_trigger.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Sensor offline"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "connectionStatus"),
@@ -160,7 +160,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Test case for the disabled rule
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/disabled_rule.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/disabled_rule.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "display_name", "Disabled notification rule"),
 					resource.TestCheckResourceAttr("dt_notification_rule.my_notification_rule", "enabled", "false"),
@@ -184,7 +184,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Test case for the disabled rule
 			{
-				Config: notificationRuleProviderConfig + readTestFile(t, "../../test/testdata/notification_rule/all_escalations.tf"),
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/all_escalations.tf"),
 				Check:  resource.ComposeAggregateTestCheckFunc(),
 			},
 		},
