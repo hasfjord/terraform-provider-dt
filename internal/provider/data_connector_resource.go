@@ -22,8 +22,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &dataConnectorResource{}
-	_ resource.ResourceWithConfigure = &dataConnectorResource{}
+	_ resource.Resource                = &dataConnectorResource{}
+	_ resource.ResourceWithConfigure   = &dataConnectorResource{}
+	_ resource.ResourceWithImportState = &dataConnectorResource{}
 )
 
 // NewDataConnectorResource is a helper function to simplify the provider implementation.
@@ -39,6 +40,11 @@ type dataConnectorResource struct {
 // Metadata returns the resource type name.
 func (r *dataConnectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_data_connector"
+}
+
+func (r *dataConnectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
 // Schema defines the schema for the resource.

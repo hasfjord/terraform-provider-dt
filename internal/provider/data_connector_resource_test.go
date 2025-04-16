@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 // Setup separate project for the test.
@@ -48,6 +49,16 @@ func TestAccDataConnectorProvider(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_data_connector.test", "labels.%", "0"),
 					resource.TestCheckResourceAttr("dt_data_connector.test", "events.%", "0"),
 				),
+			},
+			// Import testing
+			{
+				ResourceName:                         "dt_data_connector.test",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
+				ImportStateIdFunc: func(state *terraform.State) (string, error) {
+					return state.RootModule().Resources["dt_data_connector.test"].Primary.Attributes["name"], nil
+				},
 			},
 		},
 	})
