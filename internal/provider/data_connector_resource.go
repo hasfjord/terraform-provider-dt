@@ -354,27 +354,6 @@ func (r *dataConnectorResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-// Configure adds the provider configured client to the resource.
-func (r *dataConnectorResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Add a nil check when handling ProviderData because Terraform
-	// sets that data after it calls the ConfigureProvider RPC.
-	if req.ProviderData == nil {
-		return
-	}
-
-	client, ok := req.ProviderData.(*dt.Client)
-
-	if !ok {
-		resp.Diagnostics.AddError(
-			"invalid provider data",
-			"Provider data is not of the expected type",
-		)
-		return
-	}
-
-	r.client = client
-}
-
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *dataConnectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Get the current state
@@ -407,6 +386,27 @@ func (r *dataConnectorResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+// Configure adds the provider configured client to the resource.
+func (r *dataConnectorResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Add a nil check when handling ProviderData because Terraform
+	// sets that data after it calls the ConfigureProvider RPC.
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*dt.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"invalid provider data",
+			"Provider data is not of the expected type",
+		)
+		return
+	}
+
+	r.client = client
 }
 
 // stateToDataConnector converts the resource model to the API model.
