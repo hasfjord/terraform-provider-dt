@@ -371,6 +371,7 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 				Validators: []validator.String{durationValidator},
 			},
 			"reminder_notification": schema.BoolAttribute{
+				Optional:    true,
 				Computed:    true,
 				Description: "Whether or not to send a reminder notifications",
 				Default:     booldefault.StaticBool(false),

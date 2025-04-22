@@ -182,6 +182,29 @@ func TestAccNotificationRuleResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// Test case for reminder notifications
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/reminder_notification.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "With reminder notification"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "relativeHumidity"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.lower", "30"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.range.upper", "70"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "reminder_notification", "true"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.display_name", "Escalation Level 1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.type", "SMS"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.sms_config.body", "Relative humidity $relativeHumidity% is out of range"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.sms_config.recipients.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.sms_config.recipients.0", "+4798765432"),
+				),
+			},
+		},
+	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
 			// Test case for the disabled rule
 			{
 				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/all_escalations.tf"),
@@ -189,4 +212,5 @@ func TestAccNotificationRuleResource(t *testing.T) {
 			},
 		},
 	})
+
 }
