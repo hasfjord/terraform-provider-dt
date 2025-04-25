@@ -32,9 +32,9 @@ func (p Project) ID() (string, error) {
 }
 
 type Location struct {
-	Latitude     float64 `json:"latitude"`
-	Longitude    float64 `json:"longitude"`
-	TimeLocation string  `json:"timeLocation"`
+	Latitude     *float64 `json:"latitude"`
+	Longitude    *float64 `json:"longitude"`
+	TimeLocation string   `json:"timeLocation"`
 }
 
 type projectCache struct {
@@ -136,9 +136,9 @@ type createProjectRequest struct {
 	DisplayName  string `json:"displayName"`
 	Organization string `json:"organization"`
 	Location     struct {
-		Latitude     float64 `json:"latitude"`
-		Longitude    float64 `json:"longitude"`
-		TimeLocation string  `json:"timeLocation"`
+		Latitude     *float64 `json:"latitude"`
+		Longitude    *float64 `json:"longitude"`
+		TimeLocation string   `json:"timeLocation"`
 	} `json:"location"`
 }
 

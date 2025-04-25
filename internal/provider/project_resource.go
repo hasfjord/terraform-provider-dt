@@ -101,16 +101,15 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"location": schema.SingleNestedAttribute{
-				Required: true,
+				Required:    true,
+				Description: "The location of the project.",
 				Attributes: map[string]schema.Attribute{
 					"latitude": schema.Float64Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: "The latitude of the project in Degrees Decimal. This is used to determine the time zone of the project.",
 					},
 					"longitude": schema.Float64Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: "The longitude of the project in Degrees Decimal. This is used to determine the time zone of the project.",
 					},
 					"time_location": schema.StringAttribute{
@@ -287,6 +286,18 @@ func projectToState(project dt.Project) (projectResourceModel, diag.Diagnostics)
 		diags := diag.NewErrorDiagnostic("ID", "failed to get project ID")
 		return projectResourceModel{}, diag.Diagnostics{diags}
 	}
+	var latitude types.Float64
+	if project.Location.Latitude != nil {
+		latitude = types.Float64PointerValue(project.Location.Latitude)
+	} else {
+		latitude = types.Float64Null()
+	}
+	var longitude types.Float64
+	if project.Location.Longitude != nil {
+		longitude = types.Float64PointerValue(project.Location.Longitude)
+	} else {
+		longitude = types.Float64Null()
+	}
 	return projectResourceModel{
 		ID:                      types.StringValue(id),
 		Name:                    types.StringValue(project.Name),
@@ -297,15 +308,14 @@ func projectToState(project dt.Project) (projectResourceModel, diag.Diagnostics)
 		SensorCount:             types.Int32Value(int32(project.SensorCount)),
 		CloudConnectorCount:     types.Int32Value(int32(project.CloudConnectorCount)),
 		Location: &projectLocationResourceModel{
-			Latitude:     types.Float64Value(project.Location.Latitude),
-			Longitude:    types.Float64Value(project.Location.Longitude),
+			Latitude:     latitude,
+			Longitude:    longitude,
 			TimeLocation: types.StringValue(project.Location.TimeLocation),
 		},
 	}, nil
 }
 
 func stateToProject(state projectResourceModel) dt.Project {
-
 	project := dt.Project{
 		Name:                    state.Name.ValueString(),
 		DisplayName:             state.DisplayName.ValueString(),
@@ -317,8 +327,8 @@ func stateToProject(state projectResourceModel) dt.Project {
 	}
 	if state.Location != nil {
 		project.Location = dt.Location{
-			Latitude:     state.Location.Latitude.ValueFloat64(),
-			Longitude:    state.Location.Longitude.ValueFloat64(),
+			Latitude:     state.Location.Latitude.ValueFloat64Pointer(),
+			Longitude:    state.Location.Longitude.ValueFloat64Pointer(),
 			TimeLocation: state.Location.TimeLocation.ValueString(),
 		}
 	}

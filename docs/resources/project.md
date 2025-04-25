@@ -33,7 +33,7 @@ resource "dt_project" "my_project" {
 ### Required
 
 - `display_name` (String) The display name of the project.
-- `location` (Attributes) (see [below for nested schema](#nestedatt--location))
+- `location` (Attributes) The location of the project. (see [below for nested schema](#nestedatt--location))
 - `organization` (String) The reource name of the organization that the project belongs to. on the form `organizations/{organization_id}`.
 
 ### Read-Only

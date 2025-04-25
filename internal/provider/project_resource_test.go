@@ -65,8 +65,6 @@ func TestAccProjectResource(t *testing.T) {
 				Config: providerConfig + readTestFile(t, "../../testdata/project/empty_location.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dt_project.test", "display_name", "Empty Location Project"),
-					resource.TestCheckResourceAttr("dt_project.test", "location.latitude", "0"),
-					resource.TestCheckResourceAttr("dt_project.test", "location.longitude", "0"),
 					resource.TestCheckResourceAttr("dt_project.test", "location.time_location", "UTC"),
 					resource.TestCheckResourceAttr("dt_project.test", "inventory", "false"),
 				),
