@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const (
@@ -494,14 +495,18 @@ var notificationAction = schema.NestedAttributeObject{
 				},
 				"work_order_description": schema.StringAttribute{
 					Optional: true,
+					Computed: true,
 					Description: `Optional field that will populate the description of the work order. 
     								If this is not specified, a default value will be used.`,
+					Default: stringdefault.StaticString(""),
 				},
 				"studio_dashboard_url": schema.StringAttribute{
 					Optional: true,
+					Computed: true,
 					Description: `Optional field to allow users to set the Studio dashboard link that
     								should be included in the Corrigo Work Order. If this is not specified,
     								the defaultx (initial) dashboard will be used in the link.`,
+					Default: stringdefault.StaticString(""),
 				},
 			},
 		},
@@ -725,6 +730,9 @@ func (r *notificationRuleResource) Create(ctx context.Context, req resource.Crea
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	if len(plan.EscalationLevels[0].Actions) == 2 {
+		ctx = tflog.SetField(ctx, "plan", plan.EscalationLevels[0].Actions[1].CorrigoConfig)
+	}
 
 	// Convert the data to the dt.NotificationRule
 	toBeCreated, diags := stateToNotificationRule(ctx, plan)
@@ -748,6 +756,11 @@ func (r *notificationRuleResource) Create(ctx context.Context, req resource.Crea
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	if len(plan.EscalationLevels[0].Actions) == 2 {
+		ctx = tflog.SetField(ctx, "state", state.EscalationLevels[0].Actions[1].CorrigoConfig)
+		tflog.Debug(ctx, "Created notification rule")
 	}
 
 	// Set the state
@@ -1328,7 +1341,7 @@ func stateToCorrigoConfig(state *corrigoConfigModel) *dt.CorrigoConfig {
 		AssetID:              state.AssetID.ValueString(),
 		TaskID:               state.TaskID.ValueString(),
 		CustomerID:           state.CustomerID.ValueString(),
-		ClientID:             state.ClientID.String(),
+		ClientID:             state.ClientID.ValueString(),
 		ClientSecret:         state.ClientSecret.ValueString(),
 		CompanyName:          state.CompanyName.ValueString(),
 		SubTypeID:            state.SubTypeID.ValueString(),

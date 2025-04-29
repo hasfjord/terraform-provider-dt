@@ -1,7 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 
 resource "dt_notification_rule" "test" {
-  display_name = "Cloud connector offline"
+  display_name = "All escalation types"
   project_id   = dt_project.test.id
 
   trigger = {
@@ -12,36 +12,54 @@ resource "dt_notification_rule" "test" {
     }
   }
   escalation_levels = [
-    # TODO: Fix empty sensitive parameters
-    # {
-    #   display_name   = "corrigo"
-    #   escalate_after = "3600s"
-    #   actions = [{
-    #     type = "CORRIGO"
-    #     corrigo_config = {
-    #       asset_id        = "asset-id"
-    #       client_id       = "client-id"
-    #       client_secret   = "super-secret"
-    #       company_name    = "company-name"
-    #       contact_address = "contact-address"
-    #       contact_name    = "contact-name"
-    #       customer_id     = "customer-id"
-    #       sub_type_id     = "sub-type-id"
-    #       task_id         = "task-id"
-    #     }
-    #   }]
-    # },
+    {
+      display_name   = "corrigo"
+      escalate_after = "3600s"
+      actions = [
+        {
+          // without studio dashboard url and description
+          type = "CORRIGO"
+          corrigo_config = {
+            asset_id        = "asset-id-1"
+            client_id       = "client-id"
+            client_secret   = "super-secret"
+            company_name    = "company-name"
+            contact_address = "contact-address"
+            contact_name    = "contact-name"
+            customer_id     = "customer-id"
+            sub_type_id     = "sub-type-id"
+            task_id         = "task-id"
+          }
+        },
+        {
+          // full corrigo config
+          type = "CORRIGO"
+          corrigo_config = {
+            asset_id               = "asset-id-2"
+            client_id              = "client-id"
+            client_secret          = "super-secret"
+            company_name           = "company-name"
+            contact_address        = "contact-address"
+            contact_name           = "contact-name"
+            customer_id            = "customer-id"
+            sub_type_id            = "sub-type-id"
+            task_id                = "task-id"
+            work_order_description = "Temperature $celsius is over the limit"
+          }
+        }
+      ]
+    },
     {
       display_name   = "email"
       escalate_after = "3600s"
       actions = [{
         type = "EMAIL"
         email_config = {
-          body = "Temperature $celsius is over the limit"
+          body    = "Temperature $celsius is over the limit"
+          subject = "Temperature Alert"
           recipients = [
-            "this.guy@example.com"
+            "someone@example.com"
           ]
-          subject = "Cloud connector offline alert"
         }
       }]
     },
