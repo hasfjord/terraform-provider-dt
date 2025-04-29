@@ -236,6 +236,7 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 						Validators: []validator.String{stringvalidator.OneOf([]string{contactOpen, contactClose}...)},
 					},
 					"trigger_count": schema.Int32Attribute{
+						Optional: true,
 						Computed: true,
 						Description: `The number of times a device has to meet the trigger criteria (enter triggering mode) 
 											before a notification is published. The value has to be greater than 1 for this feature

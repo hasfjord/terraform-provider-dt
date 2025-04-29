@@ -113,9 +113,6 @@ Optional:
 - `occupancy` (String) Occupancy detected by a sensor. Must be one of `OCCUPIED` or `NOT_OCCUPIED`. Default is OCCUPIED
 - `presence` (String) The presence of a object or person detected by a sensor. Must be one of `PRESENT` or `ABSENT`. Default is PRESENT
 - `range` (Attributes) The range of values that the data field has to be within or without for the criteria to be met. (see [below for nested schema](#nestedatt--trigger--range))
-
-Read-Only:
-
 - `trigger_count` (Number) The number of times a device has to meet the trigger criteria (enter triggering mode) 
 											before a notification is published. The value has to be greater than 1 for this feature
 											to be "enabled". A value of 0 or 1 is considered equivalent.
