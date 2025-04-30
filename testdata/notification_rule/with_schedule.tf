@@ -2,7 +2,7 @@
 
 resource "dt_notification_rule" "test" {
   display_name = "Notification Rule Acceptance Test"
-  project_id   = dt_project.test.id
+  project_id   = data.dt_project.test.id
   device_labels = {
     foo = "bar"
   }

@@ -12,12 +12,8 @@ import (
 // Setup separate project for the test.
 // There can only be 10 data connectors per project.
 var notificationRuleProviderConfig = providerConfig + `
-resource "dt_project" "test" {
-	display_name = "Notification Rule Acceptance Test Project"
-	organization = "organizations/cvinmt9aq9sc738g6eog"
-	location = {
-		time_location = "Europe/Oslo"
-	}
+data "dt_project" "test" {
+	name = "projects/d0919uq3tjjs739bf18g"
 }
 
 `
@@ -205,7 +201,7 @@ func TestAccNotificationRuleResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Test case for the disabled rule
+			// Test case for "all" escalation types
 			{
 				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/all_escalations.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -261,9 +257,42 @@ func TestAccNotificationRuleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.3.actions.0.service_channel_config.description", "Temperature $celsius is over the limit"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.3.actions.0.service_channel_config.store_id", "store-id"),
 					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.3.actions.0.service_channel_config.trade", "REFRIGERATION"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.display_name", "SMS"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.escalate_after", "3600s"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.actions.0.type", "SMS"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.actions.0.sms_config.body", "Temperature $celsius is over the limit"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.actions.0.sms_config.recipients.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.4.actions.0.sms_config.recipients.0", "+4798765432"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.display_name", "webhook"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.actions.0.type", "WEBHOOK"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.actions.0.webhook_config.url", "https://example.com/webhook"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.actions.0.webhook_config.headers.%", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.actions.0.webhook_config.headers.Content-Type", "application/json"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.5.actions.0.webhook_config.signature_secret", "super-secret"),
 				),
 			},
 		},
 	})
-
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// test case for signal tower
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/signal_tower.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Signal Tower"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "connectionStatus"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.connection", "CLOUD_CONNECTOR_OFFLINE"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.display_name", "signal tower"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.escalate_after", "3600s"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.type", "SIGNAL_TOWER"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "escalation_levels.0.actions.0.signal_tower_config.cloud_connector_name", "projects/d0919uq3tjjs739bf18g/devices/emud091aassh1nc738nel0g"),
+				),
+			},
+		},
+	})
 }

@@ -2,7 +2,7 @@
 
 resource "dt_notification_rule" "test" {
   display_name = "With reminder notification"
-  project_id   = dt_project.test.id
+  project_id   = data.dt_project.test.id
   trigger = {
     field = "relativeHumidity"
     range = {

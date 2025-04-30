@@ -2,7 +2,7 @@
 
 resource "dt_notification_rule" "test" {
   display_name = "Cloud connector offline"
-  project_id   = dt_project.test.id
+  project_id   = data.dt_project.test.id
 
   trigger = {
     field      = "connectionStatus"

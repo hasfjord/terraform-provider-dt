@@ -3,7 +3,7 @@
 resource "dt_notification_rule" "my_notification_rule" {
   display_name = "Disabled notification rule"
   enabled      = false
-  project_id   = dt_project.test.id
+  project_id   = data.dt_project.test.id
   trigger = {
     field = "temperature"
     range = {

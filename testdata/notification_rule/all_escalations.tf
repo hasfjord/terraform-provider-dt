@@ -2,7 +2,7 @@
 
 resource "dt_notification_rule" "test" {
   display_name = "All escalation types"
-  project_id   = dt_project.test.id
+  project_id   = data.dt_project.test.id
 
   trigger = {
     field = "temperature"
@@ -90,17 +90,6 @@ resource "dt_notification_rule" "test" {
         }
       }]
     },
-    # TODO: This requires an existing cloud connector device
-    # This can be achieved once the provider supports creating emulators.
-    # {
-    #   display_name = "signal tower"
-    #   actions = [{
-    #     type = "SIGNAL_TOWER"
-    #     signal_tower_config = {
-    #       cloud_connector_name = "projects/${dt_project.test.id}/devices/123456789"
-    #     }
-    #   }]
-    # },
     {
       display_name   = "SMS"
       escalate_after = "3600s"
@@ -117,8 +106,7 @@ resource "dt_notification_rule" "test" {
       ]
     },
     {
-      display_name   = "webhook"
-      escalate_after = "3600s"
+      display_name = "webhook"
       actions = [{
         type = "WEBHOOK"
         webhook_config = {

@@ -2,7 +2,7 @@
 
 resource "dt_notification_rule" "test" {
   display_name = "Notification Rule Acceptance Test Updated"
-  project_id   = dt_project.test.id
+  project_id   = data.dt_project.test.id
   trigger = {
     field = "temperature"
     range = {
