@@ -194,7 +194,7 @@ func (c *Client) GetNotificationRule(ctx context.Context, name string) (Notifica
 
 func (c *Client) listNotificationRules(ctx context.Context, projectID string) (ListNotificationRuleResponse, error) {
 	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules", strings.TrimSuffix(c.URL, "/"), projectID)
-	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
+	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil, nil)
 	if err != nil {
 		return ListNotificationRuleResponse{}, fmt.Errorf("dt: failed to list notification rules: %w", err)
 	}
@@ -216,7 +216,7 @@ func (c *Client) CreateNotificationRule(ctx context.Context, projectID string, r
 		return NotificationRule{}, fmt.Errorf("dt: failed to marshal notification rule: %w", err)
 	}
 
-	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body)
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body, nil)
 	if err != nil {
 		return NotificationRule{}, fmt.Errorf("dt: failed to create notification rule: %w", err)
 	}
@@ -243,7 +243,7 @@ func (c *Client) UpdateNotificationRule(ctx context.Context, rule NotificationRu
 		return NotificationRule{}, fmt.Errorf("dt: failed to marshal notification rule: %w", err)
 	}
 
-	responseBody, err := c.DoRequest(ctx, http.MethodPut, url, body)
+	responseBody, err := c.DoRequest(ctx, http.MethodPut, url, body, nil)
 	if err != nil {
 		return NotificationRule{}, fmt.Errorf("dt: failed to update notification rule: %w", err)
 	}
@@ -264,7 +264,7 @@ func (c *Client) DeleteNotificationRule(ctx context.Context, name string) error 
 	}
 
 	url := fmt.Sprintf("%s/v2alpha/projects/%s/rules/%s", strings.TrimSuffix(c.URL, "/"), projectID, ruleID)
-	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil)
+	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil, nil)
 	if err != nil {
 		return fmt.Errorf("dt: failed to delete notification rule: %w", err)
 	}

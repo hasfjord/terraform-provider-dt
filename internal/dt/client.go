@@ -91,7 +91,7 @@ func (r *retryAfter) setTime(t time.Time) {
 	r.t = t
 }
 
-func (c *Client) DoRequest(ctx context.Context, method, url string, requestBody []byte) ([]byte, error) {
+func (c *Client) DoRequest(ctx context.Context, method, url string, requestBody []byte, params map[string]string) ([]byte, error) {
 	// Check if we need to wait for the retry after time
 	// before sending the request
 	time.Sleep(time.Until(c.retryAfter.time()))
@@ -102,6 +102,13 @@ func (c *Client) DoRequest(ctx context.Context, method, url string, requestBody 
 	if err != nil {
 		return nil, err
 	}
+
+	query := request.URL.Query()
+	for key, value := range params {
+		query.Set(key, value)
+		ctx = tflog.SetField(ctx, key, value)
+	}
+	request.URL.RawQuery = query.Encode()
 
 	ctx = tflog.SetField(ctx, "method", method)
 	ctx = tflog.SetField(ctx, "url", url)
@@ -136,7 +143,7 @@ func (c *Client) DoRequest(ctx context.Context, method, url string, requestBody 
 			tflog.Debug(ctx, "received 429 status code from DT API, retrying request")
 
 			// Retry the request
-			return c.DoRequest(ctx, method, url, requestBody)
+			return c.DoRequest(ctx, method, url, requestBody, params)
 		}
 		return nil, &HTTPError{
 			StatusCode: response.StatusCode,

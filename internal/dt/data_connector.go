@@ -71,7 +71,7 @@ func (c *Client) GetDataConnector(ctx context.Context, dataConnector string) (Da
 	url := fmt.Sprintf("%s/v2/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
 
 	// Send a GET request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
+	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil, nil)
 	if err != nil {
 		return DataConnector{}, err
 	}
@@ -126,7 +126,7 @@ func (c *Client) CreateDataConnector(ctx context.Context, projectID string, data
 	}
 
 	// Send a POST request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body)
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body, nil)
 	if err != nil {
 		return DataConnector{}, err
 	}
@@ -156,7 +156,7 @@ func (c *Client) UpdateDataConnector(ctx context.Context, dc DataConnector) (Dat
 	}
 
 	// Send a PATCH request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body)
+	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body, nil)
 	if err != nil {
 		return DataConnector{}, err
 	}
@@ -182,7 +182,7 @@ func (c *Client) DeleteDataConnector(ctx context.Context, dataConnector string) 
 	url := fmt.Sprintf("%s/v2/projects/%s/dataconnectors/%s", strings.TrimSuffix(c.URL, "/"), projectID, dataConnectorID)
 
 	// Send a DELETE request to the API
-	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil)
+	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil, nil)
 	if err != nil {
 		return err
 	}

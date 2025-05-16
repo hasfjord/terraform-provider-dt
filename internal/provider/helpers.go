@@ -25,6 +25,17 @@ func flattenStringListToAttr(ctx context.Context, input []string) (basetypes.Lis
 	return list, nil
 }
 
+func flattenStringSetToAttr(ctx context.Context, input []string) (basetypes.SetValue, diag.Diagnostics) {
+	if input == nil {
+		return types.SetNull(types.StringType), nil
+	}
+	set, diags := types.SetValueFrom(ctx, types.StringType, input)
+	if diags.HasError() {
+		return types.SetValueMust(types.StringType, []attr.Value{}), diags
+	}
+	return set, nil
+}
+
 // expandStringList converts a list of string values to a list of strings.
 func expandStringList(ctx context.Context, listValue basetypes.ListValue) ([]string, diag.Diagnostics) {
 	if listValue.IsNull() {
@@ -35,6 +46,24 @@ func expandStringList(ctx context.Context, listValue basetypes.ListValue) ([]str
 	}
 	elements := make([]types.String, 0, len(listValue.Elements()))
 	diags := listValue.ElementsAs(ctx, &elements, false)
+
+	var result []string
+	for _, element := range elements {
+		result = append(result, element.ValueString())
+	}
+
+	return result, diags
+}
+
+func expandStringSet(ctx context.Context, setValue basetypes.SetValue) ([]string, diag.Diagnostics) {
+	if setValue.IsNull() {
+		return nil, nil
+	}
+	if setValue.IsUnknown() {
+		return nil, nil
+	}
+	elements := make([]types.String, 0, len(setValue.Elements()))
+	diags := setValue.ElementsAs(ctx, &elements, false)
 
 	var result []string
 	for _, element := range elements {
