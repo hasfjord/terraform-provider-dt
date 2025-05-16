@@ -87,7 +87,7 @@ func (c *Client) listProjects(ctx context.Context) (ListProjectResponse, error) 
 	url := fmt.Sprintf("%s/v2/projects", strings.TrimSuffix(c.URL, "/"))
 
 	// Send a GET request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil)
+	responseBody, err := c.DoRequest(ctx, http.MethodGet, url, nil, nil)
 	if err != nil {
 		return ListProjectResponse{}, err
 	}
@@ -116,7 +116,7 @@ func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, e
 	}
 
 	// Send a PUT request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body)
+	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body, nil)
 	if err != nil {
 		return Project{}, err
 	}
@@ -158,7 +158,7 @@ func (c *Client) CreateProject(ctx context.Context, project Project) (Project, e
 	}
 
 	// Send a POST request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body)
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body, nil)
 	if err != nil {
 		return Project{}, err
 	}
@@ -184,7 +184,7 @@ func (c *Client) DeleteProject(ctx context.Context, project string) error {
 	url := fmt.Sprintf("%s/v2/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
 
 	// Send a DELETE request to the API
-	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil)
+	_, err = c.DoRequest(ctx, http.MethodDelete, url, nil, nil)
 	if err != nil {
 		return err
 	}

@@ -208,6 +208,7 @@ func (p *DTProvider) Resources(_ context.Context) []func() resource.Resource {
 		NewDataConnectorResource,
 		NewNotificationRuleResource,
 		NewEmulatorResource,
+		NewMemberResource,
 	}
 }
 

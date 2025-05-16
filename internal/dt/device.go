@@ -18,7 +18,7 @@ type Device struct {
 
 func (c *Client) GetDevice(ctx context.Context, deviceName string) (*Device, error) {
 	url := fmt.Sprintf("%s/v2/%s", strings.TrimSuffix(c.URL, "/"), deviceName)
-	responseBody, err := c.DoRequest(ctx, "GET", url, nil)
+	responseBody, err := c.DoRequest(ctx, "GET", url, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("dt: failed to get device: %w", err)
 	}
