@@ -289,6 +289,12 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 										E.g. "Europe/Oslo", "America/Los_Angeles", "UTC"
 										See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones`,
 					},
+					"inverse": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "true, the schedule will be active when the event time is outside all specified slots.",
+						Default:     booldefault.StaticBool(false),
+					},
 					"slots": schema.ListNestedAttribute{
 						Optional:    true,
 						Description: "Slots of time where the rule should be active or inactive.",
@@ -704,6 +710,7 @@ type rangeModel struct {
 type scheduleModel struct {
 	Timezone types.String `tfsdk:"timezone"`
 	Slots    []slotsModel `tfsdk:"slots"`
+	Inverse  types.Bool   `tfsdk:"inverse"`
 }
 
 type slotsModel struct {
@@ -1115,7 +1122,9 @@ func scheduleToState(schedule *dt.Schedule) *scheduleModel {
 	if schedule == nil {
 		return nil
 	}
-	scheduleModel := scheduleModel{}
+	scheduleModel := scheduleModel{
+		Inverse: types.BoolValue(schedule.Inverse),
+	}
 	scheduleModel.Timezone = types.StringValue(schedule.Timezone)
 
 	scheduleModel.Slots = make([]slotsModel, len(schedule.Slots))
@@ -1418,6 +1427,7 @@ func stateToSchedule(state *scheduleModel) *dt.Schedule {
 	schedule := dt.Schedule{
 		Timezone: state.Timezone.ValueString(),
 		Slots:    make([]dt.Slot, len(state.Slots)),
+		Inverse:  state.Inverse.ValueBool(),
 	}
 
 	for slotIndex, slot := range state.Slots {

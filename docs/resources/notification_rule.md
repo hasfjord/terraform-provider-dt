@@ -395,6 +395,7 @@ Required:
 
 Optional:
 
+- `inverse` (Boolean) true, the schedule will be active when the event time is outside all specified slots.
 - `slots` (Attributes List) Slots of time where the rule should be active or inactive. (see [below for nested schema](#nestedatt--schedule--slots))
 
 <a id="nestedatt--schedule--slots"></a>

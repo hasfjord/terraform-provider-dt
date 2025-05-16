@@ -295,4 +295,38 @@ func TestAccNotificationRuleResource(t *testing.T) {
 			},
 		},
 	})
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// test case for inverse schedule
+			{
+				Config: notificationRuleProviderConfig + readTestFile(t, "../../testdata/notification_rule/inverse_schedule.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "display_name", "Off Hours Schedule"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.timezone", "Europe/Oslo"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.#", "2"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.day_of_week.#", "5"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.day_of_week.0", "Monday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.day_of_week.1", "Tuesday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.day_of_week.2", "Wednesday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.day_of_week.3", "Thursday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.day_of_week.4", "Friday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.time_range.#", "1"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.time_range.0.start.hour", "8"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.time_range.0.start.minute", "0"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.time_range.0.end.hour", "20"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.0.time_range.0.end.minute", "0"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.day_of_week.#", "2"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.day_of_week.0", "Saturday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.day_of_week.1", "Sunday"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.time_range.0.start.hour", "10"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.time_range.0.start.minute", "30"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.time_range.0.end.hour", "18"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.slots.1.time_range.0.end.minute", "0"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "schedule.inverse", "true"),
+					resource.TestCheckResourceAttr("dt_notification_rule.test", "trigger.field", "temperature"),
+				),
+			},
+		},
+	})
 }
