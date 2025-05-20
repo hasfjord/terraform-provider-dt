@@ -3,6 +3,7 @@
 package dt
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -133,7 +134,7 @@ func (c *Client) DoRequest(ctx context.Context, method, url string, body io.Read
 			tflog.Debug(ctx, "received 429 status code from DT API, retrying request")
 
 			// Retry the request
-			return c.DoRequest(ctx, method, url, body)
+			return c.DoRequest(ctx, method, url, bytes.NewReader(bodyBytes))
 		}
 		return nil, &HTTPError{
 			StatusCode: response.StatusCode,
