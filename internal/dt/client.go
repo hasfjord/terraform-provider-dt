@@ -91,10 +91,12 @@ func (r *retryAfter) setTime(t time.Time) {
 	r.t = t
 }
 
-func (c *Client) DoRequest(ctx context.Context, method, url string, body io.Reader) ([]byte, error) {
+func (c *Client) DoRequest(ctx context.Context, method, url string, requestBody []byte) ([]byte, error) {
 	// Check if we need to wait for the retry after time
 	// before sending the request
 	time.Sleep(time.Until(c.retryAfter.time()))
+
+	body := bytes.NewReader(requestBody)
 
 	request, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
@@ -134,7 +136,7 @@ func (c *Client) DoRequest(ctx context.Context, method, url string, body io.Read
 			tflog.Debug(ctx, "received 429 status code from DT API, retrying request")
 
 			// Retry the request
-			return c.DoRequest(ctx, method, url, bytes.NewReader(bodyBytes))
+			return c.DoRequest(ctx, method, url, requestBody)
 		}
 		return nil, &HTTPError{
 			StatusCode: response.StatusCode,

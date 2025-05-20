@@ -3,7 +3,6 @@
 package dt
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -42,7 +41,7 @@ func (c *Client) CreateEmulator(ctx context.Context, projectID string, emulatorT
 	}
 
 	url := c.EmulatorURL + "/v2/projects/" + projectID + "/devices"
-	responseBody, err := c.DoRequest(ctx, "POST", url, bytes.NewReader(body))
+	responseBody, err := c.DoRequest(ctx, "POST", url, body)
 	if err != nil {
 		return Emulator{}, err
 	}
@@ -81,7 +80,7 @@ func (c *Client) UpdateEmulator(ctx context.Context, emulator Emulator) (Emulato
 		return Emulator{}, err
 	}
 
-	responseBody, err := c.DoRequest(ctx, "PUT", url, strings.NewReader(string(body)))
+	responseBody, err := c.DoRequest(ctx, "PUT", url, body)
 	if err != nil {
 		return Emulator{}, err
 	}

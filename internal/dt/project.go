@@ -3,7 +3,6 @@
 package dt
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -117,7 +116,7 @@ func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, e
 	}
 
 	// Send a PUT request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, bytes.NewReader(body))
+	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body)
 	if err != nil {
 		return Project{}, err
 	}
@@ -159,7 +158,7 @@ func (c *Client) CreateProject(ctx context.Context, project Project) (Project, e
 	}
 
 	// Send a POST request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, bytes.NewReader(body))
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return Project{}, err
 	}

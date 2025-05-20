@@ -126,7 +126,7 @@ func (c *Client) CreateDataConnector(ctx context.Context, projectID string, data
 	}
 
 	// Send a POST request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, strings.NewReader(string(body)))
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return DataConnector{}, err
 	}
@@ -156,7 +156,7 @@ func (c *Client) UpdateDataConnector(ctx context.Context, dc DataConnector) (Dat
 	}
 
 	// Send a PATCH request to the API
-	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, strings.NewReader(string(body)))
+	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body)
 	if err != nil {
 		return DataConnector{}, err
 	}

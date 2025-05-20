@@ -3,7 +3,6 @@
 package dt
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -217,7 +216,7 @@ func (c *Client) CreateNotificationRule(ctx context.Context, projectID string, r
 		return NotificationRule{}, fmt.Errorf("dt: failed to marshal notification rule: %w", err)
 	}
 
-	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, bytes.NewReader(body))
+	responseBody, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return NotificationRule{}, fmt.Errorf("dt: failed to create notification rule: %w", err)
 	}
@@ -244,7 +243,7 @@ func (c *Client) UpdateNotificationRule(ctx context.Context, rule NotificationRu
 		return NotificationRule{}, fmt.Errorf("dt: failed to marshal notification rule: %w", err)
 	}
 
-	responseBody, err := c.DoRequest(ctx, http.MethodPut, url, bytes.NewReader(body))
+	responseBody, err := c.DoRequest(ctx, http.MethodPut, url, body)
 	if err != nil {
 		return NotificationRule{}, fmt.Errorf("dt: failed to update notification rule: %w", err)
 	}
