@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccEmulatorResourceExample(t *testing.T) {
+func TestAccSafeEmulatorResourceExample(t *testing.T) {
 	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -31,7 +31,7 @@ func TestAccEmulatorResourceExample(t *testing.T) {
 	})
 }
 
-func TestAccEmulatorResource(t *testing.T) {
+func TestAccSafeEmulatorResource(t *testing.T) {
 	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
