@@ -3,7 +3,6 @@
 package dt
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -120,12 +119,12 @@ func (c *Client) ListProjectMemberships(ctx context.Context, organization, role,
 func (c *Client) BatchCreateMemberships(ctx context.Context, req BatchCreateProjectsMembersRequest) ([]Membership, error) {
 	url := c.URL + "/v2/projects/-/members:batchCreate"
 
-	body, err := json.Marshal(req)
+	requestBody, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("dt: failed to marshal create members request: %w", err)
 	}
 
-	responseBody, err := c.DoRequest(ctx, "POST", url, bytes.NewReader(body), nil)
+	responseBody, err := c.DoRequest(ctx, "POST", url, requestBody, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -155,12 +154,12 @@ func (c *Client) UpdateMemberships(ctx context.Context, memberships []Membership
 		member.Roles = []string{role}
 
 		url := c.URL + "/v2/projects/" + projectID + "/members/" + memberID
-		body, err := json.Marshal(member)
+		requestBody, err := json.Marshal(member)
 		if err != nil {
 			return nil, fmt.Errorf("dt: failed to marshal memberships: %w", err)
 		}
 
-		responseBody, err := c.DoRequest(ctx, "PATCH", url, bytes.NewReader(body), nil)
+		responseBody, err := c.DoRequest(ctx, "PATCH", url, requestBody, nil)
 		if err != nil {
 			return nil, fmt.Errorf("dt: failed to update memberships: %w", err)
 		}
@@ -179,12 +178,12 @@ func (c *Client) UpdateMemberships(ctx context.Context, memberships []Membership
 func (c *Client) BatchDeleteMemberships(ctx context.Context, req BatchDeleteProjectMembersRequest) error {
 	url := c.URL + "/v2/projects/-/members:batchDelete"
 
-	body, err := json.Marshal(req)
+	requestBody, err := json.Marshal(req)
 	if err != nil {
 		return fmt.Errorf("dt: failed to marshal batch delete memberships request: %w", err)
 	}
 
-	_, err = c.DoRequest(ctx, "POST", url, bytes.NewReader(body), nil)
+	_, err = c.DoRequest(ctx, "POST", url, requestBody, nil)
 	if err != nil {
 		return fmt.Errorf("dt: failed to delete memberships: %w", err)
 	}
