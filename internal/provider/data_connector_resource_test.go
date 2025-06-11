@@ -22,7 +22,7 @@ resource "dt_project" "test" {
 
 `
 
-func TestAccDataConnectorProvider(t *testing.T) {
+func TestAccSafeDataConnectorProvider(t *testing.T) {
 	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

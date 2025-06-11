@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccDeviceDataSource(t *testing.T) {
+func TestAccSafeDeviceDataSource(t *testing.T) {
 	t.Parallel()
 	t.Log("TestAccDeviceDataSource")
 	resource.Test(t, resource.TestCase{

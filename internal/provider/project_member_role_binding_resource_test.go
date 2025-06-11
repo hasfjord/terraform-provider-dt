@@ -9,8 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccMemberRoleBindingResource(t *testing.T) {
-	t.Parallel()
+func TestAccMemberRoleBindingResource(t *testing.T) { // nolint:paralleltest //this test modifies the same resource multiple times do not run in parallel
 	t.Log("TestAccDeviceDataSource")
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
