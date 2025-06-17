@@ -113,5 +113,5 @@ jobs:
           DT_API_KEY_SECRET: ${{ secrets.DT_API_KEY_SECRET }}
           DT_API_KEY_ID: ${{ vars.DT_API_KEY_ID }}
           DT_OIDC_EMAIL: ${{ vars.DT_OIDC_EMAIL }}
-        run: go test -v -cover ./internal/provider/ --run 'TestAccMemberRoleBindingResource'
+        run: go test -v -cover ./internal/provider/ --run 'TestAcc(MemberRoleBinding|Emulator)Resource(|Example)'
         timeout-minutes: 10
