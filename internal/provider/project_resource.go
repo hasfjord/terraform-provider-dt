@@ -210,23 +210,23 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// retrieve values from plan
-	var plan projectResourceModel
-	diags := req.Plan.Get(ctx, &plan)
+	var state projectResourceModel
+	diags := req.Plan.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// generate the api request from the plan
-	project := stateToProject(plan)
-	project, err := r.client.UpdateProject(ctx, project)
+	toBeUpdated := stateToUpdateProjectRequest(state)
+	project, err := r.client.UpdateProject(ctx, toBeUpdated)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update project", err.Error())
 		return
 	}
 
 	// set the updated state
-	state, diags := projectToState(project)
+	updateProjectState(project, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -333,4 +333,31 @@ func stateToProject(state projectResourceModel) dt.Project {
 		}
 	}
 	return project
+}
+
+func stateToUpdateProjectRequest(state projectResourceModel) dt.EditableProject {
+	updateRequest := dt.EditableProject{
+		Name:         state.Name.ValueString(),
+		DisplayName:  state.DisplayName.ValueString(),
+		Organization: state.Organization.ValueString(),
+	}
+	if state.Location != nil {
+		updateRequest.Location = dt.Location{
+			Latitude:     state.Location.Latitude.ValueFloat64Pointer(),
+			Longitude:    state.Location.Longitude.ValueFloat64Pointer(),
+			TimeLocation: state.Location.TimeLocation.ValueString(),
+		}
+	}
+	return updateRequest
+}
+
+func updateProjectState(project dt.EditableProject, state *projectResourceModel) {
+	state.Name = types.StringValue(project.Name)
+	state.DisplayName = types.StringValue(project.DisplayName)
+	state.Organization = types.StringValue(project.Organization)
+	state.Location = &projectLocationResourceModel{
+		Latitude:     types.Float64PointerValue(project.Location.Latitude),
+		Longitude:    types.Float64PointerValue(project.Location.Longitude),
+		TimeLocation: types.StringValue(project.Location.TimeLocation),
+	}
 }

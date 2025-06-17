@@ -56,6 +56,17 @@ func TestAccSafeProjectResource(t *testing.T) {
 					return state.RootModule().Resources["dt_project.test"].Primary.Attributes["name"], nil
 				},
 			},
+			{
+				// Update testing
+				Config: providerConfig + readTestFile(t, "../../testdata/project/with_updated_location.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("dt_project.test", "display_name", "Acceptance Test Project"),
+					resource.TestCheckResourceAttr("dt_project.test", "location.latitude", "59.910953"),
+					resource.TestCheckResourceAttr("dt_project.test", "location.longitude", "10.63904"),
+					resource.TestCheckResourceAttr("dt_project.test", "location.time_location", "Europe/Oslo"),
+					resource.TestCheckResourceAttr("dt_project.test", "inventory", "false"),
+				),
+			},
 		},
 	})
 	resource.Test(t, resource.TestCase{

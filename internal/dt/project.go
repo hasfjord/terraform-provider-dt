@@ -26,6 +26,13 @@ type Project struct {
 	Location                Location `json:"location"`
 }
 
+type EditableProject struct {
+	Name         string   `json:"name"`
+	DisplayName  string   `json:"displayName"`
+	Organization string   `json:"organization"`
+	Location     Location `json:"location"`
+}
+
 func (p Project) ID() (string, error) {
 	return idFromProject(p.Name)
 }
@@ -101,31 +108,31 @@ func (c *Client) listProjects(ctx context.Context) (ListProjectResponse, error) 
 	return projects, nil
 }
 
-func (c *Client) UpdateProject(ctx context.Context, project Project) (Project, error) {
+func (c *Client) UpdateProject(ctx context.Context, project EditableProject) (EditableProject, error) {
 	// Get the project ID from the project name
 	projectID, err := idFromProject(project.Name)
 	if err != nil {
-		return Project{}, fmt.Errorf("failed to get project ID: %w", err)
+		return EditableProject{}, fmt.Errorf("failed to get project ID: %w", err)
 	}
 
 	// Create the URL for the API request: https://api.disruptive-technologies.com/v2/projects/{project_id}
 	url := fmt.Sprintf("%s/v2/projects/%s", strings.TrimSuffix(c.URL, "/"), projectID)
 	body, err := json.Marshal(project)
 	if err != nil {
-		return Project{}, err
+		return EditableProject{}, err
 	}
 
 	// Send a PUT request to the API
 	responseBody, err := c.DoRequest(ctx, http.MethodPatch, url, body, nil)
 	if err != nil {
-		return Project{}, err
+		return EditableProject{}, err
 	}
 
 	// Unmarshal the response body to a Project struct
-	var p Project
+	var p EditableProject
 	err = json.Unmarshal(responseBody, &p)
 	if err != nil {
-		return Project{}, err
+		return EditableProject{}, err
 	}
 
 	return p, nil
