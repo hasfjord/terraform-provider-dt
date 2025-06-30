@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -185,6 +186,18 @@ func (r *notificationRuleResource) Schema(ctx context.Context, req resource.Sche
 									rangeTypeWithin),
 								Validators: []validator.String{stringvalidator.OneOf([]string{rangeTypeWithin, rangeTypeOutside}...)},
 								Default:    stringdefault.StaticString(rangeTypeWithin),
+							},
+							"filter": schema.SingleNestedAttribute{
+								Optional:    true,
+								Description: "An optional filter when applied the rule will only trigger if the filtered temperature is within the specified range.",
+								Attributes: map[string]schema.Attribute{
+									"product_equivalent_temperature": schema.SingleNestedAttribute{
+										// This is an empty object, as the ProductEquivalentTemperature filter does not have any attributes.
+										Optional:    true,
+										Description: "An empty object, as the ProductEquivalentTemperature filter does not have any attributes.",
+										Attributes:  map[string]schema.Attribute{},
+									},
+								},
 							},
 						},
 					},
@@ -702,9 +715,22 @@ type triggerModel struct {
 }
 
 type rangeModel struct {
-	Lower types.Float64 `tfsdk:"lower"`
-	Upper types.Float64 `tfsdk:"upper"`
-	Type  types.String  `tfsdk:"type"`
+	Lower  types.Float64         `tfsdk:"lower"`
+	Upper  types.Float64         `tfsdk:"upper"`
+	Type   types.String          `tfsdk:"type"`
+	Filter basetypes.ObjectValue `tfsdk:"filter"`
+}
+
+type filterModel struct {
+	ProductEquivalentTemperature basetypes.ObjectValue `tfsdk:"product_equivalent_temperature"`
+}
+
+func (m filterModel) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"product_equivalent_temperature": types.ObjectType{
+			AttrTypes: map[string]attr.Type{},
+		},
+	}
 }
 
 type scheduleModel struct {
@@ -904,6 +930,9 @@ func notificationRuleToState(ctx context.Context, notificationRule dt.Notificati
 	deviceLabelsMap, d := types.MapValueFrom(ctx, types.StringType, notificationRule.DeviceLabels)
 	diags = append(diags, d...)
 
+	trigger, d := triggerToState(ctx, notificationRule.Trigger)
+	diags = append(diags, d...)
+
 	escalationLevels, d := escalationLevelToState(ctx, notificationRule.EscalationLevels)
 	diags = append(diags, d...)
 
@@ -928,7 +957,7 @@ func notificationRuleToState(ctx context.Context, notificationRule dt.Notificati
 	state.DisplayName = types.StringValue(notificationRule.DisplayName)
 	state.Devices = devicesList
 	state.DeviceLabels = deviceLabelsMap
-	state.Trigger = triggerToState(notificationRule.Trigger)
+	state.Trigger = trigger
 	state.EscalationLevels = escalationLevels
 	state.Schedule = scheduleToState(notificationRule.Schedule)
 
@@ -1152,20 +1181,12 @@ func scheduleToState(schedule *dt.Schedule) *scheduleModel {
 	return &scheduleModel
 }
 
-func triggerToState(trigger dt.Trigger) *triggerModel {
+func triggerToState(ctx context.Context, trigger dt.Trigger) (*triggerModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
 
 	model := triggerModel{
 		Field: types.StringValue(trigger.Field),
 	}
-
-	if trigger.Range != nil {
-		model.Range = &rangeModel{
-			Lower: types.Float64PointerValue(trigger.Range.Lower),
-			Upper: types.Float64PointerValue(trigger.Range.Upper),
-			Type:  types.StringValue(trigger.Range.Type),
-		}
-	}
-
 	model.Presence = types.StringNull()
 	if trigger.Presence != nil {
 		model.Presence = types.StringValue(*trigger.Presence)
@@ -1191,7 +1212,43 @@ func triggerToState(trigger dt.Trigger) *triggerModel {
 		model.TriggerCount = types.Int32Null()
 	}
 
-	return &model
+	// skip range if it is nil
+	if trigger.Range == nil {
+		return &model, diags
+	}
+
+	model.Range = &rangeModel{
+		Lower:  types.Float64PointerValue(trigger.Range.Lower),
+		Upper:  types.Float64PointerValue(trigger.Range.Upper),
+		Type:   types.StringValue(trigger.Range.Type),
+		Filter: types.ObjectNull(filterModel{}.AttributeTypes(ctx)),
+	}
+
+	// skip filter if it is nil
+	if trigger.Range.Filter == nil {
+		return &model, diags
+	}
+
+	// petFilter is an empty object, as the ProductEquivalentTemperature filter does not have any attributes.
+	petFilter, d := types.ObjectValue(map[string]attr.Type{}, map[string]attr.Value{})
+	diags = append(diags, d...)
+	if d.HasError() {
+		return &model, diags
+	}
+
+	// Create the filter model with the ProductEquivalentTemperature filter and transform it to an ObjectValue.
+	filterModel := filterModel{
+		ProductEquivalentTemperature: petFilter,
+	}
+	filterObject, d := types.ObjectValueFrom(ctx, filterModel.AttributeTypes(ctx), filterModel)
+	diags = append(diags, d...)
+	if d.HasError() {
+		return &model, diags
+	}
+
+	model.Range.Filter = filterObject
+
+	return &model, diags
 }
 
 func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (dt.NotificationRule, diag.Diagnostics) {
@@ -1201,6 +1258,9 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 
 	deviceLabels := make(map[string]string)
 	d = state.DeviceLabels.ElementsAs(ctx, &deviceLabels, false)
+	diags = append(diags, d...)
+
+	trigger, d := stateToTrigger(ctx, state.Trigger)
 	diags = append(diags, d...)
 
 	escalationLevels, d := stateToEscalationLevels(ctx, state.EscalationLevels)
@@ -1219,7 +1279,7 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 		DisplayName:          state.DisplayName.ValueString(),
 		Devices:              devices,
 		DeviceLabels:         deviceLabels,
-		Trigger:              stateToTrigger(state.Trigger),
+		Trigger:              trigger,
 		EscalationLevels:     escalationLevels,
 		Schedule:             schedule,
 		TriggerDelay:         triggerDelay,
@@ -1230,9 +1290,10 @@ func stateToNotificationRule(ctx context.Context, state notificationRuleModel) (
 	}, diags
 }
 
-func stateToTrigger(state *triggerModel) dt.Trigger {
+func stateToTrigger(ctx context.Context, state *triggerModel) (dt.Trigger, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	if state == nil {
-		return dt.Trigger{}
+		return dt.Trigger{}, diags
 	}
 	trigger := dt.Trigger{
 		Field:        state.Field.ValueString(),
@@ -1243,8 +1304,10 @@ func stateToTrigger(state *triggerModel) dt.Trigger {
 		Contact:      state.Contact.ValueStringPointer(),
 		TriggerCount: state.TriggerCount.ValueInt32(),
 	}
+
+	// skip range if it is nil
 	if state.Range == nil {
-		return trigger
+		return trigger, diags
 	}
 
 	trigger.Range = &dt.Range{
@@ -1252,7 +1315,27 @@ func stateToTrigger(state *triggerModel) dt.Trigger {
 		Upper: state.Range.Upper.ValueFloat64Pointer(),
 		Type:  state.Range.Type.ValueString(),
 	}
-	return trigger
+
+	// skip filter if it is nil or unknown
+	if state.Range.Filter.IsNull() || state.Range.Filter.IsUnknown() {
+		return trigger, diags
+	}
+
+	var filter filterModel
+	diags = state.Range.Filter.As(ctx, &filter, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return trigger, diags
+	}
+
+	if filter.ProductEquivalentTemperature.IsNull() || filter.ProductEquivalentTemperature.IsUnknown() {
+		return trigger, diags
+	}
+
+	trigger.Range.Filter = &dt.Filter{
+		ProductEquivalentTemperature: &struct{}{},
+	}
+
+	return trigger, diags
 }
 
 func stateToEscalationLevels(ctx context.Context, state []escalationLevelModel) ([]dt.EscalationLevel, diag.Diagnostics) {

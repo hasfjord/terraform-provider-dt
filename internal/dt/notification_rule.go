@@ -114,9 +114,14 @@ type Trigger struct {
 }
 
 type Range struct {
-	Lower *float64 `json:"lower"`
-	Upper *float64 `json:"upper"`
-	Type  string   `json:"type"`
+	Lower  *float64 `json:"lower"`
+	Upper  *float64 `json:"upper"`
+	Type   string   `json:"type"`
+	Filter *Filter  `json:"filter"`
+}
+
+type Filter struct {
+	ProductEquivalentTemperature *struct{} `json:"productEquivalentTemperature"`
 }
 
 type Schedule struct {

@@ -124,9 +124,22 @@ Optional:
 
 Optional:
 
+- `filter` (Attributes) An optional filter when applied the rule will only trigger if the filtered temperature is within the specified range. (see [below for nested schema](#nestedatt--trigger--range--filter))
 - `lower` (Number) The minimum value of the range.
 - `type` (String) The type of range to use. Must be one of `WITHIN` or `OUTSIDE`. Default is `WITHIN`.
 - `upper` (Number) The maximum value of the range.
+
+<a id="nestedatt--trigger--range--filter"></a>
+### Nested Schema for `trigger.range.filter`
+
+Optional:
+
+- `product_equivalent_temperature` (Attributes) An empty object, as the ProductEquivalentTemperature filter does not have any attributes. (see [below for nested schema](#nestedatt--trigger--range--filter--product_equivalent_temperature))
+
+<a id="nestedatt--trigger--range--filter--product_equivalent_temperature"></a>
+### Nested Schema for `trigger.range.filter.product_equivalent_temperature`
+
+
 
 
 
