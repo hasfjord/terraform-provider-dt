@@ -5,6 +5,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/disruptive-technologies/terraform-provider-dt/internal/dt"
@@ -100,6 +101,12 @@ func (m *projectMemberRoleBindingsResource) Schema(_ context.Context, _ resource
 				// require recreation of the resource if the email changes
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{stringvalidator.RegexMatches(regexp.MustCompile(`^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`),
+					`Email must be a valid email address and use all lowercase letters.
+					local part may contain letters, numbers, dots, underscores, and hyphens.
+					Domain part must contain letters, numbers, dots, and hyphens. 
+					The domain must end with a top-level domain of at least two characters.`),
 				},
 			},
 			"role": schema.StringAttribute{
@@ -475,7 +482,7 @@ func membershipsToState(ctx context.Context, organization string, memberships []
 		MemberDisplayName: types.StringValue(displayName),
 		Projects:          projectsSet,
 		Organization:      types.StringValue(organization),
-		Email:             types.StringValue(email),
+		Email:             types.StringValue(strings.ToLower(email)),
 		Role:              types.StringValue(role),
 		AccountType:       types.StringValue(accountType),
 	}, diags

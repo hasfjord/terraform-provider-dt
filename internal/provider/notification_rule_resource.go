@@ -5,6 +5,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/disruptive-technologies/terraform-provider-dt/internal/dt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -460,6 +462,14 @@ var notificationAction = schema.NestedAttributeObject{
 					Required:    true,
 					ElementType: types.StringType,
 					Description: "The email addresses to send the email to.",
+					Validators: []validator.List{
+						listvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile(`^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`),
+							`Email must be a valid email address and use all lowercase letters.
+					local part may contain letters, numbers, dots, underscores, and hyphens.
+					Domain part must contain letters, numbers, dots, and hyphens. 
+					The domain must end with a top-level domain of at least two characters.`),
+						),
+					},
 				},
 				"subject": schema.StringAttribute{
 					Required:    true,
@@ -1062,7 +1072,12 @@ func emailConfigToState(ctx context.Context, emailConfig *dt.EmailConfig) (*emai
 		return nil, diags
 	}
 
-	recipientsList, d := types.ListValueFrom(ctx, types.StringType, emailConfig.Recipients)
+	recipientsLowerCase := make([]string, 0, len(emailConfig.Recipients))
+	for _, recipient := range emailConfig.Recipients {
+		recipientsLowerCase = append(recipientsLowerCase, strings.ToLower(recipient))
+	}
+
+	recipientsList, d := types.ListValueFrom(ctx, types.StringType, recipientsLowerCase)
 	diags = append(diags, d...)
 
 	return &emailConfigModel{
